@@ -157,6 +157,26 @@ export const WarningIcon = ({ size }: P) => (
   </Svg>
 );
 
+export const SunIcon = ({ size }: P) => (
+  <Svg size={size}>
+    <circle cx="8" cy="8" r="2.9" />
+    <path d="M8 1.6v1.5M8 12.9v1.5M1.6 8h1.5M12.9 8h1.5M3.5 3.5l1 1M11.5 11.5l1 1M3.5 12.5l1-1M11.5 4.5l1-1" />
+  </Svg>
+);
+
+export const MoonIcon = ({ size }: P) => (
+  <Svg size={size}>
+    <path d="M13.2 9.9A5.6 5.6 0 0 1 6.1 2.8a5.6 5.6 0 1 0 7.1 7.1Z" />
+  </Svg>
+);
+
+export const AutoThemeIcon = ({ size }: P) => (
+  <Svg size={size}>
+    <circle cx="8" cy="8" r="5.6" />
+    <path d="M8 2.4v11.2a5.6 5.6 0 0 0 0-11.2Z" fill="currentColor" stroke="none" />
+  </Svg>
+);
+
 export const UndoIcon = ({ size }: P) => (
   <Svg size={size}>
     <path d="M5.5 3.5 2.5 6.5l3 3" />

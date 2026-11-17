@@ -19,7 +19,8 @@ import {
 } from "./lib/api";
 import { insertAt, isMon, plainText, toEditable, fromEditable } from "./lib/text";
 import { HongsaIcon, HongsaMark } from "./components/Brand";
-import { ExportIcon, FilmIcon, FolderIcon, MemoryIcon, RedoIcon, SaveIcon, UndoIcon } from "./components/Icons";
+import { AutoThemeIcon, ExportIcon, FilmIcon, FolderIcon, MemoryIcon, MoonIcon, RedoIcon, SaveIcon, SunIcon, UndoIcon } from "./components/Icons";
+import { useTheme, type ThemePref } from "./lib/theme";
 import { Transport } from "./components/Transport";
 import { ALT, ENTER, MOD, SHIFT } from "./lib/keys";
 import { LineEditor } from "./components/LineEditor";
@@ -43,6 +44,8 @@ type Snapshot = { events: SubtitleEvent[]; styles: Style[]; focusId: string | nu
 type History = { past: Snapshot[]; future: Snapshot[]; group: string | null; at: number };
 
 const HISTORY_LIMIT = 300;
+const NEXT_THEME: Record<ThemePref, ThemePref> = { system: "paper", paper: "dark", dark: "system" };
+const THEME_LABEL: Record<ThemePref, string> = { system: "follows macOS", paper: "Paper", dark: "Dark" };
 const COALESCE_MS = 1200;
 const EMPTY_HISTORY: History = { past: [], future: [], group: null, at: 0 };
 
@@ -97,6 +100,7 @@ export default function App() {
   const [toast, setToast] = useState<Toast>(null);
   const [memoryRev, setMemoryRev] = useState(0);
   const [pps, setPps] = useState(70);
+  const { pref: themePref, theme, setPref: setThemePref } = useTheme();
   const [focusLayout, setFocusLayoutState] = useState<boolean>(() => {
     try {
       return localStorage.getItem("hongsasub.layout") === "focus";
@@ -1025,6 +1029,14 @@ export default function App() {
             </button>
           </div>
         )}
+        <button
+          className="icon-btn themeswitch"
+          onClick={() => setThemePref(NEXT_THEME[themePref])}
+          title={`Appearance: ${THEME_LABEL[themePref]}. Click for ${THEME_LABEL[NEXT_THEME[themePref]]}.`}
+          aria-label={`Appearance: ${THEME_LABEL[themePref]}`}
+        >
+          {themePref === "system" ? <AutoThemeIcon /> : themePref === "paper" ? <SunIcon /> : <MoonIcon />}
+        </button>
         <nav className="actions" aria-label="File">
           {project && (
             <ToolsMenu
@@ -1167,6 +1179,7 @@ export default function App() {
             onSeek={seek}
             onSelect={select}
             onTiming={(id, start, end) => updateEvent(id, { start, end }, `drag:${id}`)}
+            theme={theme}
           />
           <SubtitleGrid events={events} selectedId={selectedId} translating={translating} onSelect={select} issues={issuesById} cpsLimit={limits.cps} />
         </Workspace>

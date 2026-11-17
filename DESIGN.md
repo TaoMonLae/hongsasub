@@ -1,6 +1,6 @@
 ---
 name: HongsaSub
-description: A Mon subtitle editor and translation memory, dressed as a Mac pro video editor.
+description: A Mon subtitle editor and translation memory, dressed as a Mac pro video editor, in Paper and Dark themes.
 colors:
   window: "#1c1c1e"
   pane: "#232325"
@@ -225,7 +225,13 @@ HongsaSub is a subtitle translator that looks and behaves like a Mac pro video e
 
 The workspace is dense and fixed: a 44px toolbar, then viewer, line editor and memory inspector across the top, a full-width transport row, a three-track timeline and a virtualized line grid. Every region is a flat pane on a near-black separator field, so the layout reads as one instrument rather than a stack of cards. Interface text sits at 13px system weight; Mon is the only text that is ever large.
 
-This world replaced the earlier warm-black-and-gold look on 2026-11-16 by the user's choice. Gold accents, warm blacks and invented costume worlds are rejected.
+This world replaced the earlier warm-black-and-gold look on 2026-11-16 by the user's choice. Gold accents, warm blacks and invented costume worlds are rejected in the Dark theme.
+
+**Two themes (2026-11-18, user's choice).** The app ships in two themes that share every layout, size and component rule:
+- **Paper** takes its colours from the hand-drawn logo: cream paper panes, sepia ink text, Mon red for action, focus and selection, and a dark gold for the selected clip and drafts.
+- **Dark** is the graphite "Night Edit Bay" described in the frontmatter tokens, unchanged.
+
+The app follows macOS (Paper by day, Dark at night) unless the translator picks one with the toolbar's appearance button, which cycles Follow macOS, Paper and Dark and is remembered. The window's native title bar follows the same choice. Tokens live in `src/styles.css`: Paper on `:root`, Dark on `:root[data-theme="dark"]`. An inline script in `index.html` sets the theme before the first paint, so neither theme flashes.
 
 **Key Characteristics:**
 - Four graphite steps (well, window, pane, raised pane) divided by a 1px near-black separator and a 7.5% white hairline.
@@ -266,6 +272,15 @@ A neutral graphite ramp with macOS system colours used strictly as signals.
 - **Hairline / Strong Hairline** (`hairline`, `hairline-strong`): inset strokes on cards, fields and segmented controls.
 - **Text / Secondary / Tertiary** (`text`, `text-secondary`, `text-tertiary`): primary copy, supporting copy, labels and metadata.
 - **Sheet / Toast** (`sheet`, `toast`): modal cards and transient notices.
+
+### Paper theme palette
+The same token names carry these values under Paper. Signal meanings do not change; only the hue of "action" moves from system blue to Mon red.
+- **Neutrals:** window `#efe3c9`, pane `#f7efdf`, raised pane `#fcf7ec`, well `#e9dcc1`, field `#fffbf3`, separator `#d6c6a5`, hairlines in sepia ink at 10% and 20%.
+- **Text:** ink `#3a1d12`, secondary `#5f4234`, tertiary `#715645`. Tertiary passes 4.5:1 on the window and well colours.
+- **Accent (Mon red):** fill `#b8262f`, hover `#c5323b`, press `#9b1d26`, link text `#a3222b`, soft 12% wash. Text on the accent is warm white `#fff8ee`. Grid row selection is `#f1d6c9`, and text selection is a 42% gold wash with ink text.
+- **Signals:** selected clip gold `#c98500`; confirmed green `#2e7a3a`; draft amber `#9a5c06`; errors vermilion `#c2410c`, kept more orange than the crimson accent and always paired with the warning icon.
+- **Timeline:** source clips slate `#dfe5ec` with `#2f3f53` text, confirmed clips `#d6e8cc`, waveform `#6d86a3`, playhead in ink.
+- **Depth:** the same shadow vocabulary in sepia at lower strength, with a white top bevel on controls instead of a white hairline.
 
 ### Named Rules
 **The Signal Colour Rule.** Blue, yellow, green, amber and red each carry one meaning across the whole app. A colour never appears as decoration, and a meaning never borrows a second colour.
@@ -412,8 +427,9 @@ Not yet built, and not part of the system until they ship: a recent-projects lis
 - **Do** use 120–240ms transitions on the shared `cubic-bezier(0.22, 1, 0.36, 1)` ease, and collapse them under reduced motion.
 
 ### Don't:
-- **Don't** bring back the warm-black-and-gold look or any invented costume world; this app is the pro video editor category played straight.
-- **Don't** add a light theme; the interface stays dark for night work beside the film.
+- **Don't** bring back the warm-black-and-gold look or any invented costume world in the Dark theme; Dark is the pro video editor category played straight.
+- **Don't** hard-code a colour in a component or rule. Every colour is a token defined for both themes, and canvas drawing reads tokens at draw time and redraws on a theme change.
+- **Don't** make Paper stark white. Its brightest surface is the field `#fffbf3`, so the picture and the Mon text still carry the light.
 - **Don't** shrink Mon to make a layout fit; hide secondary Latin labels first.
 - **Don't** use purple, decorative gradients or glows in the chrome. The hatched untranslated clip, the loading shimmer and the brand mark's tile are the only gradient fills; the caption text shadow exists for legibility over the picture.
 - **Don't** put more than one filled blue button on a surface.
@@ -422,8 +438,8 @@ Not yet built, and not part of the system until they ship: a recent-projects lis
 
 ## Brand mark
 
-Two marks share one graphite app-icon tile (vertical #3c3c41 to #1e1e21, 14% white rim) and one blue subtitle line (#0a84ff) along the bottom.
+One hand-drawn mark (`brand/hongsasub-icon.svg`, generated as hand-drawn line work): a golden Hongsa painted in gouache with sketchy sepia ink outlines and pencil hatching, in front of a dry-brushed Mon-red sun, floating on two hand-inked subtitle strokes, on a cream paper tile with a wobbly ink border.
 
-- **Hongsa icon** (`HongsaIcon`, `brand/hongsasub-icon.svg`): the hongsa of Hongsawatoi, with a crest and an upswept curled tail. The bird's body is the first subtitle line, in white, and the blue line below it is the Mon line. It is used at 64px and above: the app and Dock icon (`src-tauri/icons`, made from `brand/hongsasub-icon-1024.png`) and the welcome screen.
-- **Ha mark** (`HongsaMark`, `brand/hongsasub-mark.svg`): the Mon letter ဟ, the first letter of ဟံသာ, set on the blue subtitle line. It is used below 64px, where the bird blurs: the toolbar (22px), the favicon (`public/hongsa.svg`) and the 30, 32 and 44px Tauri icons. The glyph outline comes from Noto Sans Myanmar Bold (SIL Open Font License).
-- **Don't** put the bird below 64px, recolour the tile, or move the blue line above the white shape.
+- **Uses:** the app and Dock icons (`src-tauri/icons`, made from `brand/hongsasub-icon-1024.png`), the favicon and in-app mark (`public/hongsa.svg`, cropped to the tile), the toolbar (22px) and the welcome screen (88px). `Brand.tsx` loads the same file for both sizes.
+- The Paper theme's palette is taken from this mark: paper cream, sepia ink, Mon red and gold.
+- **Don't** redraw it with clean geometric strokes, recolour the sun or the bird, or drop the subtitle strokes under the bird.

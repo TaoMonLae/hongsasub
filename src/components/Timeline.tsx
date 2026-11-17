@@ -18,6 +18,7 @@ interface Props {
   onSeek: (ms: number) => void;
   onSelect: (id: string) => void;
   onTiming: (id: string, start: number, end: number) => void;
+  theme: string;
 }
 
 type DragMode = "start" | "end" | "move";
@@ -115,7 +116,7 @@ function cssVar(el: Element, name: string, fallback: string) {
 }
 
 export function Timeline(props: Props) {
-  const { events, selectedId, time, duration, playing, translating, pps, onPps, peaks, peaksStatus, onSeek, onSelect, onTiming } = props;
+  const { events, selectedId, time, duration, playing, translating, pps, onPps, peaks, peaksStatus, onSeek, onSelect, onTiming, theme } = props;
   const scrollRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [viewW, setViewW] = useState(800);
@@ -218,7 +219,7 @@ export function Timeline(props: Props) {
     }
     ctx.fillStyle = sep;
     ctx.fillRect(0, RULER - 1, viewW, 1);
-  }, [peaks, pps, scrollLeft, viewW, viewH, tracks]);
+  }, [peaks, pps, scrollLeft, viewW, viewH, tracks, theme]);
 
   useEffect(() => {
     const el = scrollRef.current;

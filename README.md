@@ -48,6 +48,7 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 - A **Styles manager** with a reusable style library.
 - **Find and replace** that never touches tags or line breaks.
 - Undo and redo for every text, timing and style change.
+- **Paper and Dark themes.** Warm cream Paper takes its colours from the logo, and graphite Dark is for night work. The app follows macOS, or you can pick one from the toolbar.
 - Resizable panes, and a **Focus** layout for long translation sessions.
 - Opens `.srt`, `.ass` and `.ssa`. Saves `.hongsa` projects and exports ASS or SRT.
 

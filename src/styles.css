@@ -1,4 +1,94 @@
 :root {
+  --radius: 6px;
+  --radius-small: 4px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-mon: "Mon3 Anonta 1", "MON3 Anonta 1", "Pyidaungsu", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  accent-color: var(--accent);
+  caret-color: var(--accent);
+  --win: #efe3c9;
+  --pane: #f7efdf;
+  --pane-2: #fcf7ec;
+  --well: #e9dcc1;
+  --control: #ebdfc5;
+  --control-hover: #e2d3b4;
+  --control-press: #d7c5a1;
+  --field: #fffbf3;
+  --sep: #d6c6a5;
+  --hair: rgba(58, 29, 18, 0.1);
+  --hair-2: rgba(58, 29, 18, 0.2);
+  --text: #3a1d12;
+  --text-2: #5f4234;
+  --text-3: #715645;
+  --accent: #b8262f;
+  --accent-fill: #b8262f;
+  --accent-hover: #c5323b;
+  --accent-press: #9b1d26;
+  --accent-text: #a3222b;
+  --accent-soft: rgba(184, 38, 47, 0.12);
+  --on-accent: #fff8ee;
+  --focus: rgba(184, 38, 47, 0.5);
+  --focus-halo: rgba(184, 38, 47, 0.22);
+  --selection: rgba(232, 168, 60, 0.42);
+  --selection-text: #3a1d12;
+  --row-sel: #f1d6c9;
+  --row-hover: rgba(58, 29, 18, 0.045);
+  --wash-1: rgba(58, 29, 18, 0.04);
+  --wash-2: rgba(58, 29, 18, 0.07);
+  --wash-3: rgba(58, 29, 18, 0.09);
+  --wash-4: rgba(58, 29, 18, 0.16);
+  --wash-5: rgba(58, 29, 18, 0.28);
+  --track-fill: rgba(58, 29, 18, 0.07);
+  --bevel: inset 0 0.5px 0 rgba(255, 255, 255, 0.7), 0 1px 1.5px rgba(58, 29, 18, 0.16);
+  --shadow-seg: 0 1px 2px rgba(58, 29, 18, 0.18), inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
+  --shadow-pop: 0 12px 32px rgba(58, 29, 18, 0.2), 0 2px 6px rgba(58, 29, 18, 0.12);
+  --clip-sel: #c98500;
+  --clip-sel-outer: rgba(58, 29, 18, 0.25);
+  --clip-sel-glow: rgba(201, 133, 0, 0.35);
+  --green: #2e7a3a;
+  --green-soft: rgba(46, 122, 58, 0.13);
+  --green-ring: rgba(46, 122, 58, 0.5);
+  --green-clip: #d6e8cc;
+  --green-edge: #8bb983;
+  --amber: #9a5c06;
+  --amber-soft: rgba(214, 140, 20, 0.17);
+  --amber-clip: #f2deae;
+  --amber-edge: #c79a3b;
+  --draft-fill: #f4e8cf;
+  --draft-edge: rgba(201, 133, 0, 0.6);
+  --red: #c2410c;
+  --red-soft: rgba(194, 65, 12, 0.12);
+  --red-soft-2: rgba(194, 65, 12, 0.22);
+  --red-line: rgba(194, 65, 12, 0.6);
+  --red-clip: #f6d3c3;
+  --source-clip: #dfe5ec;
+  --source-edge: #a9b7c8;
+  --source-text: #2f3f53;
+  --wave: #6d86a3;
+  --track-band: #f1e7d2;
+  --track-sep: #d9caab;
+  --tick: #b6a283;
+  --tick-label: #6c5646;
+  --raised-hover: #fffdf7;
+  --on-green: #fbfff8;
+  --checker: #efe4cd;
+  --checker-2: #f8f0e0;
+  --untrans: #c9b89a;
+  --untrans-fill: rgba(58, 29, 18, 0.03);
+  --untrans-edge: rgba(58, 29, 18, 0.22);
+  --untranslated-ring: #a08b72;
+  --hatch: rgba(58, 29, 18, 0.06);
+  --comment-dash: #b7a68b;
+  --playhead: #3a1d12;
+  --scrim: rgba(58, 29, 18, 0.28);
+  --sheet: #fbf5e9;
+  --toast: #3a1d12;
+  --toast-text: #fbf3e4;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
   --win: #1c1c1e;
   --pane: #232325;
   --pane-2: #2a2a2d;
@@ -13,23 +103,47 @@
   --text: #f2f2f4;
   --text-2: #b4b4ba;
   --text-3: #9a9aa1;
-  --blue: #0a84ff;
-  --blue-fill: #0864d6;
-  --blue-press: #0757ba;
-  --blue-text: #6cb4ff;
+  --accent: #0a84ff;
+  --accent-fill: #0864d6;
+  --accent-hover: #1872e4;
+  --accent-press: #0757ba;
+  --accent-text: #6cb4ff;
+  --accent-soft: rgba(10, 132, 255, 0.16);
+  --on-accent: #fff;
+  --focus: rgba(10, 132, 255, 0.55);
+  --focus-halo: rgba(10, 132, 255, 0.35);
+  --selection: rgba(10, 132, 255, 0.45);
+  --selection-text: #fff;
   --row-sel: #1d3a5f;
   --row-hover: rgba(255, 255, 255, 0.04);
+  --wash-1: rgba(255, 255, 255, 0.04);
+  --wash-2: rgba(255, 255, 255, 0.08);
+  --wash-3: rgba(255, 255, 255, 0.1);
+  --wash-4: rgba(255, 255, 255, 0.15);
+  --wash-5: rgba(255, 255, 255, 0.28);
+  --track-fill: rgba(0, 0, 0, 0.3);
+  --bevel: inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 1px 1.5px rgba(0, 0, 0, 0.35);
+  --shadow-seg: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0.5px 0 rgba(255, 255, 255, 0.14);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
   --clip-sel: #ffd60a;
+  --clip-sel-outer: rgba(0, 0, 0, 0.6);
+  --clip-sel-glow: rgba(255, 214, 10, 0.4);
   --green: #32d74b;
   --green-soft: rgba(50, 215, 75, 0.16);
+  --green-ring: rgba(50, 215, 75, 0.45);
   --green-clip: #1d4a2b;
   --green-edge: #2f7a46;
   --amber: #ffb340;
   --amber-soft: rgba(255, 179, 64, 0.16);
   --amber-clip: #4f3d14;
   --amber-edge: #8c6a22;
+  --draft-fill: #2c2c30;
+  --draft-edge: rgba(255, 179, 64, 0.55);
   --red: #ff6961;
   --red-soft: rgba(255, 105, 97, 0.16);
+  --red-soft-2: rgba(255, 105, 97, 0.28);
+  --red-line: rgba(255, 105, 97, 0.6);
+  --red-clip: #4a2523;
   --source-clip: #27364a;
   --source-edge: #3d5574;
   --source-text: #c6d5e8;
@@ -40,18 +154,20 @@
   --tick-label: #9a9aa1;
   --raised-hover: #333336;
   --on-green: #0d2a12;
-  --red-clip: #4a2523;
   --checker: #222225;
+  --checker-2: #2a2a2d;
+  --untrans: #4a4a50;
+  --untrans-fill: rgba(255, 255, 255, 0.025);
+  --untrans-edge: rgba(255, 255, 255, 0.16);
   --untranslated-ring: #7c7c83;
-  --radius: 6px;
-  --radius-small: 4px;
-  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --font-mon: "Mon3 Anonta 1", "MON3 Anonta 1", "Pyidaungsu", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  --hatch: rgba(255, 255, 255, 0.035);
+  --comment-dash: #66666c;
+  --playhead: #fff;
+  --scrim: rgba(0, 0, 0, 0.45);
+  --sheet: #2b2b2e;
+  --toast: #3a3a3e;
+  --toast-text: #f2f2f4;
   color-scheme: dark;
-  accent-color: var(--blue);
 }
 
 * {
@@ -72,12 +188,12 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
   user-select: none;
-  caret-color: var(--blue);
+  caret-color: var(--accent);
 }
 
 ::selection {
-  background: rgba(10, 132, 255, 0.45);
-  color: #fff;
+  background: var(--selection);
+  color: var(--selection-text);
 }
 
 ::-webkit-scrollbar {
@@ -90,14 +206,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--wash-4);
   border: 3px solid transparent;
   border-radius: 8px;
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.28);
+  background-color: var(--wash-5);
 }
 
 ::-webkit-scrollbar-corner {
@@ -136,7 +252,7 @@ textarea {
 }
 
 :focus-visible {
-  outline: 3px solid rgba(10, 132, 255, 0.55);
+  outline: 3px solid var(--focus);
   outline-offset: 1px;
 }
 
@@ -169,7 +285,7 @@ kbd {
   border-radius: 3px;
   color: inherit;
   opacity: 0.72;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--wash-2);
   white-space: nowrap;
 }
 
@@ -186,7 +302,7 @@ kbd {
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
-  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 1px 1.5px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--bevel);
   transition: background-color 120ms var(--ease);
 }
 
@@ -199,16 +315,16 @@ kbd {
 }
 
 .btn--primary {
-  background: var(--blue-fill);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: #1872e4;
+  background: var(--accent-hover);
 }
 
 .btn--primary:active:not(:disabled) {
-  background: var(--blue-press);
+  background: var(--accent-press);
 }
 
 .btn--primary kbd {
@@ -223,7 +339,7 @@ kbd {
 }
 
 .btn--plain:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--wash-2);
   color: var(--text);
 }
 
@@ -252,12 +368,12 @@ kbd {
 }
 
 .icon-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--wash-2);
   color: var(--text);
 }
 
 .icon-btn:active:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--wash-4);
 }
 
 .icon-btn--small {
@@ -286,7 +402,7 @@ kbd {
 
 .control:focus,
 .field:focus {
-  box-shadow: inset 0 0 0 1px var(--blue), 0 0 0 3px rgba(10, 132, 255, 0.35);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 3px var(--focus-halo);
 }
 
 select.control {
@@ -317,7 +433,7 @@ select.control {
   font-size: 11px;
   font-weight: 500;
   color: var(--text-2);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--wash-2);
 }
 
 .tag {
@@ -328,8 +444,8 @@ select.control {
   border-radius: 4px;
   font-size: 11px;
   font-weight: 500;
-  color: var(--blue-text);
-  background: rgba(10, 132, 255, 0.14);
+  color: var(--accent-text);
+  background: var(--accent-soft);
   white-space: nowrap;
 }
 
@@ -447,7 +563,7 @@ select.control {
   width: 120px;
   height: 5px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--wash-3);
   overflow: hidden;
 }
 
@@ -579,14 +695,14 @@ select.control {
   width: min(220px, 70%);
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--wash-3);
   overflow: hidden;
 }
 
 .viewer__progress span {
   position: absolute;
   inset: 0 auto 0 0;
-  background: var(--blue);
+  background: var(--accent);
   border-radius: 2px;
   transition: width 240ms var(--ease);
 }
@@ -658,7 +774,7 @@ select.control {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  border: 2px solid var(--wash-4);
   border-top-color: var(--text-2);
   animation: spin 800ms linear infinite;
 }
@@ -743,7 +859,7 @@ select.control {
 .status--untranslated,
 .status--comment {
   color: var(--text-2);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--wash-2);
 }
 
 .editor__timing {
@@ -779,7 +895,7 @@ select.control {
 }
 
 .timefield input:focus {
-  box-shadow: inset 0 0 0 1px var(--blue), 0 0 0 3px rgba(10, 132, 255, 0.35);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 3px var(--focus-halo);
 }
 
 .timefield.is-bad input {
@@ -829,14 +945,14 @@ select.control {
 
 .term-mark {
   font: inherit;
-  color: var(--blue-text);
+  color: var(--accent-text);
   text-decoration: underline;
   text-decoration-color: rgba(108, 180, 255, 0.5);
   text-underline-offset: 3px;
 }
 
 .term-mark:hover {
-  text-decoration-color: var(--blue-text);
+  text-decoration-color: var(--accent-text);
 }
 
 .editor__target {
@@ -905,7 +1021,7 @@ select.control {
 }
 
 .editor__target textarea:focus {
-  box-shadow: inset 0 0 0 1px var(--blue), 0 0 0 3px rgba(10, 132, 255, 0.3);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 3px var(--focus-halo);
 }
 
 .editor__foot {
@@ -967,7 +1083,7 @@ select.control {
   padding: 2px;
   gap: 2px;
   border-radius: 7px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--track-fill);
   box-shadow: inset 0 0 0 0.5px var(--hair-2);
 }
 
@@ -994,7 +1110,7 @@ select.control {
 .segmented button.is-on {
   background: var(--control-hover);
   color: var(--text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0.5px 0 rgba(255, 255, 255, 0.14);
+  box-shadow: var(--shadow-seg);
 }
 
 .segmented em {
@@ -1074,7 +1190,7 @@ select.control {
 }
 
 .match--exact {
-  box-shadow: inset 0 0 0 1px rgba(50, 215, 75, 0.45);
+  box-shadow: inset 0 0 0 1px var(--green-ring);
 }
 
 .match__body {
@@ -1109,13 +1225,13 @@ select.control {
 }
 
 .score--high {
-  color: var(--blue-text);
-  background: rgba(10, 132, 255, 0.18);
+  color: var(--accent-text);
+  background: var(--accent-soft);
 }
 
 .score--low {
   color: var(--text-2);
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--wash-3);
 }
 
 .match__target {
@@ -1143,7 +1259,7 @@ select.control {
 .diff--delete {
   color: var(--red);
   text-decoration: line-through;
-  text-decoration-color: rgba(255, 105, 97, 0.7);
+  text-decoration-color: var(--red-line);
 }
 
 .match__meta {
@@ -1202,7 +1318,7 @@ select.control {
 }
 
 .searchfield:focus-within {
-  box-shadow: inset 0 0 0 1px var(--blue), 0 0 0 3px rgba(10, 132, 255, 0.35);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 3px var(--focus-halo);
 }
 
 .searchfield input {
@@ -1476,7 +1592,7 @@ select.control {
 }
 
 .ov--untranslated {
-  fill: #4a4a50;
+  fill: var(--untrans);
 }
 
 .overview__sel {
@@ -1493,7 +1609,7 @@ select.control {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #fff;
+  background: var(--playhead);
   pointer-events: none;
 }
 
@@ -1531,7 +1647,7 @@ select.control {
 }
 
 .key--untranslated::before {
-  background: #4a4a50;
+  background: var(--untrans);
 }
 
 .key--comment::before {
@@ -1663,19 +1779,19 @@ select.control {
 }
 
 .clip--draft {
-  --fill: #2c2c30;
-  --edge: rgba(255, 179, 64, 0.55);
+  --fill: var(--draft-fill);
+  --edge: var(--draft-edge);
 }
 
 .clip--untranslated {
-  --fill: rgba(255, 255, 255, 0.025);
-  --edge: rgba(255, 255, 255, 0.16);
+  --fill: var(--untrans-fill);
+  --edge: var(--untrans-edge);
   color: var(--text-3);
-  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 4px, transparent 4px 8px);
+  background-image: repeating-linear-gradient(135deg, var(--hatch) 0 4px, transparent 4px 8px);
 }
 
 .clip.is-selected {
-  box-shadow: inset 0 0 0 2px var(--clip-sel), 0 0 0 1px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 0 0 2px var(--clip-sel), 0 0 0 1px var(--clip-sel-outer);
   z-index: 2;
 }
 
@@ -1736,7 +1852,7 @@ select.control {
   bottom: 0;
   width: 1px;
   margin-left: -0.5px;
-  background: #fff;
+  background: var(--playhead);
   pointer-events: none;
   z-index: 3;
 }
@@ -1748,7 +1864,7 @@ select.control {
   left: -5px;
   width: 11px;
   height: 12px;
-  background: #fff;
+  background: var(--playhead);
   clip-path: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%);
 }
 
@@ -1854,7 +1970,7 @@ select.control {
   width: 8px;
   height: 2px;
   border-radius: 1px;
-  background: #66666c;
+  background: var(--comment-dash);
 }
 
 .cell-src,
@@ -1970,7 +2086,7 @@ select.control {
   display: grid;
   place-items: start center;
   padding-top: 12vh;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--scrim);
   z-index: 20;
   animation: fade 140ms var(--ease);
 }
@@ -1979,7 +2095,7 @@ select.control {
   width: min(480px, calc(100vw - 32px));
   padding: 20px;
   border-radius: 12px;
-  background: #2b2b2e;
+  background: var(--sheet);
   box-shadow: var(--shadow-pop), inset 0 0 0 1px var(--hair-2);
   animation: rise 180ms var(--ease);
 }
@@ -2044,7 +2160,7 @@ select.control {
 .choice__item:hover,
 .choice__item:focus-visible {
   background: var(--raised-hover);
-  box-shadow: inset 0 0 0 1px var(--blue);
+  box-shadow: inset 0 0 0 1px var(--accent);
   outline: none;
 }
 
@@ -2135,8 +2251,8 @@ select.control {
   max-width: min(560px, calc(100vw - 40px));
   padding: 9px 14px;
   border-radius: 8px;
-  background: #3a3a3e;
-  color: var(--text);
+  background: var(--toast);
+  color: var(--toast-text);
   font-size: 13px;
   box-shadow: var(--shadow-pop), inset 0 0 0 1px var(--hair-2);
   z-index: 30;
@@ -2144,8 +2260,9 @@ select.control {
 }
 
 .toast--error {
+  color: var(--text);
   background: var(--red-clip);
-  box-shadow: var(--shadow-pop), inset 0 0 0 1px rgba(255, 105, 97, 0.4);
+  box-shadow: var(--shadow-pop), inset 0 0 0 1px var(--red-line);
 }
 
 @keyframes toast {
@@ -2268,7 +2385,7 @@ select.control {
 }
 
 .fmtbar__btn:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent);
   outline-offset: -1px;
 }
 
@@ -2343,7 +2460,7 @@ select.control {
   width: 300px;
   padding: 12px;
   border-radius: 10px;
-  background: #2b2b2e;
+  background: var(--sheet);
   box-shadow: var(--shadow-pop), inset 0 0 0 1px var(--hair-2);
   display: grid;
   gap: 8px;
@@ -2464,7 +2581,7 @@ select.control {
 }
 
 .stylemgr__list:focus-visible {
-  box-shadow: inset 0 0 0 1px var(--blue), 0 0 0 3px rgba(10, 132, 255, 0.3);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 3px var(--focus-halo);
 }
 
 .stylemgr__list li {
@@ -2655,8 +2772,8 @@ select.control {
 }
 
 .styleedit__align button.is-on {
-  background: var(--blue-fill);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 .styleedit__row3 {
@@ -2688,7 +2805,7 @@ select.control {
   border-radius: var(--radius);
   overflow: hidden;
   background:
-    repeating-conic-gradient(#2a2a2d 0 25%, var(--checker) 0 50%) 0 0 / 16px 16px;
+    repeating-conic-gradient(var(--checker-2) 0 25%, var(--checker) 0 50%) 0 0 / 16px 16px;
   box-shadow: inset 0 0 0 1px var(--hair-2);
 }
 
@@ -2716,12 +2833,12 @@ select.control {
 
 .sideswitch button:hover:not(.is-on) {
   color: var(--text-2);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--wash-1);
 }
 
 .sideswitch button.is-on {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--wash-2);
 }
 
 .sideswitch__badge {
@@ -2784,7 +2901,7 @@ select.control {
 }
 
 .checks__summary .btn.is-on {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--wash-3);
   color: var(--text);
 }
 
@@ -2863,7 +2980,7 @@ select.control {
 }
 
 .checks__line.is-selected {
-  box-shadow: inset 0 0 0 1px var(--blue);
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 .checks__head {
@@ -2939,13 +3056,13 @@ select.control {
 }
 
 .checks__msg:focus-visible {
-  outline: 3px solid rgba(10, 132, 255, 0.55);
+  outline: 3px solid var(--focus);
   outline-offset: 0;
 }
 
 .checks__fix {
   flex: none;
-  color: var(--blue-text);
+  color: var(--accent-text);
 }
 
 .editor__issues {
@@ -2991,7 +3108,7 @@ select.control {
 .splitter::after {
   content: "";
   position: absolute;
-  background: var(--blue);
+  background: var(--accent);
   opacity: 0;
   transition: opacity 120ms ease;
 }
@@ -3074,7 +3191,7 @@ select.control {
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: var(--blue);
+  accent-color: var(--accent);
 }
 
 .review__row.is-skipped .review__en,
@@ -3172,7 +3289,7 @@ select.control {
 
 .toolsmenu__list button:hover:not(:disabled),
 .toolsmenu__list button:focus-visible {
-  background: var(--blue-fill);
+  background: var(--accent-fill);
   outline: none;
 }
 
@@ -3275,7 +3392,7 @@ select.control {
   width: 1px;
   margin-left: -0.5px;
   background: var(--clip-sel);
-  box-shadow: 0 0 0 0.5px rgba(255, 214, 10, 0.4);
+  box-shadow: 0 0 0 0.5px var(--clip-sel-glow);
   pointer-events: none;
   z-index: 4;
 }
@@ -3315,5 +3432,5 @@ select.control {
 }
 
 .editor__word:hover {
-  background: rgba(255, 105, 97, 0.28);
+  background: var(--red-soft-2);
 }

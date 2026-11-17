@@ -35,7 +35,7 @@ A subtitle editor built around a Mon translation memory. Every confirmed line an
 
 ## Brand Commitments
 
-- Name: HongsaSub. The previous logo mark and gold accent are not binding.
+- Name: HongsaSub. Logo: a hand-drawn golden Hongsa on a Mon-red sun over two subtitle strokes, on cream paper (2026-11-18). The Paper theme takes its colours from it.
 - Visual standard: the category standard for professional video editors, played straight and dark. Craft bar: Final Cut Pro (Mac-native, calm, refined). Chosen over invented worlds on 2026-11-16.
 
 ## Evidence on Hand
@@ -48,9 +48,9 @@ A subtitle editor built around a Mon translation memory. Every confirmed line an
 1. The translator's hands never leave the keyboard for routine work.
 2. Memory is the product: matches, terms and diffs are always in view, never behind a click.
 3. Mon text is the hero of every surface it appears in, set large and readable.
-4. Night work beside a playing film: the interface stays dark and quiet so the picture and the words carry the light.
+4. Night work beside a playing film: the interface stays quiet so the picture and the words carry the light. Dark at night, warm Paper by day.
 
 ## Accessibility & Inclusion
 
-- Dark interface required; no bright light theme.
+- Two themes: Paper (warm cream, from the logo) and Dark (graphite). The app follows macOS by default, and the translator can pick one. No stark white surfaces.
 - Mon text must never shrink below its current size.
