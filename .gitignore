@@ -1,0 +1,11 @@
+node_modules
+dist
+target
+src-tauri/gen
+*.hongsa.tmp
+.DS_Store
+.env*.local
+.impeccable
+*.tsbuildinfo
+/*.srt
+/*.ass
