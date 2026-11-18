@@ -19,6 +19,13 @@ Every line you confirm goes into a translation memory, so the same or a similar 
 
 [Get started](#get-started) · [Features](#features) · [Keyboard](#keyboard) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
+  <img src="docs/screenshot-paper.png" alt="HongsaSub translating a film: the video with its caption, the English and Mon line editor, a translation memory match, the waveform timeline and the list of lines" width="100%">
+</picture>
+
 </div>
 
 ## Why HongsaSub
