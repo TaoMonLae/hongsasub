@@ -43,6 +43,10 @@ colors:
   error-toast: "#4a2523"
   checker: "#222225"
   untranslated-ring: "#7c7c83"
+  live-2: "#dbe4f0"
+  live-3: "#c3d2e6"
+  live-red: "#ff9a94"
+  live-blue: "#a6d0ff"
 typography:
   display:
     fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Helvetica Neue, Segoe UI, system-ui, sans-serif"
@@ -100,6 +104,36 @@ typography:
     fontFamily: "Mon3 Anonta 1, Pyidaungsu, Noto Sans Myanmar, Myanmar Text, Padauk, sans-serif"
     fontSize: "15px"
     lineHeight: 1.7
+  landing-display:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Display, Helvetica Neue, Segoe UI, system-ui, sans-serif"
+    fontSize: "clamp(40px, 5.4vw, 68px)"
+    fontWeight: 600
+    lineHeight: 1.03
+    letterSpacing: "-0.022em"
+  landing-headline:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Display, Helvetica Neue, Segoe UI, system-ui, sans-serif"
+    fontSize: "clamp(30px, 3.4vw, 44px)"
+    fontWeight: 600
+    lineHeight: 1.08
+    letterSpacing: "-0.018em"
+  landing-lead:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Helvetica Neue, Segoe UI, system-ui, sans-serif"
+    fontSize: "clamp(17px, 1.45vw, 19px)"
+    fontWeight: 400
+    lineHeight: 1.55
+  landing-body:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Helvetica Neue, Segoe UI, system-ui, sans-serif"
+    fontSize: "16px"
+    fontWeight: 400
+    lineHeight: 1.55
+  mon-ledger:
+    fontFamily: "OngJanehRot, Mon3 Anonta 1, Pyidaungsu, Noto Sans Myanmar, Myanmar Text, Padauk, sans-serif"
+    fontSize: "clamp(30px, 2.2vw, 34px)"
+    lineHeight: 1.6
+  mon-live:
+    fontFamily: "OngJanehRot, Mon3 Anonta 1, Pyidaungsu, Noto Sans Myanmar, Myanmar Text, Padauk, sans-serif"
+    fontSize: "clamp(34px, 3vw, 40px)"
+    lineHeight: 1.6
 rounded:
   key: "3px"
   small: "4px"
@@ -109,6 +143,10 @@ rounded:
   card: "8px"
   panel: "10px"
   sheet: "12px"
+  landing-control: "8px"
+  landing-large: "10px"
+  landing-frame: "12px"
+  landing-card: "14px"
 spacing:
   hair: "2px"
   xs: "4px"
@@ -213,6 +251,34 @@ components:
     rounded: "{rounded.sheet}"
     padding: "20px"
     width: "480px"
+  landing-button:
+    backgroundColor: "{colors.control}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.landing-control}"
+    padding: "0 14px"
+    height: "34px"
+  landing-button-large:
+    rounded: "{rounded.landing-large}"
+    padding: "0 22px"
+    height: "48px"
+  landing-command:
+    backgroundColor: "{colors.field}"
+    rounded: "{rounded.landing-large}"
+    padding: "0 6px 0 14px"
+    height: "44px"
+  ledger-row:
+    backgroundColor: "{colors.pane}"
+    typography: "{typography.mon-ledger}"
+    padding: "14px 0"
+  ledger-live-row:
+    backgroundColor: "{colors.row-selection}"
+    textColor: "{colors.text}"
+    typography: "{typography.mon-live}"
+    padding: "22px 0 6px"
+  match-showcase-card:
+    backgroundColor: "{colors.pane-raised}"
+    rounded: "{rounded.landing-card}"
+    padding: "22px 24px 20px"
 ---
 
 # Design System: HongsaSub
@@ -292,6 +358,7 @@ The same token names carry these values under Paper. Signal meanings do not chan
 **UI Font:** SF Pro Text via `-apple-system` (with Helvetica Neue, Segoe UI, system-ui)
 **Mono Font:** SF Mono via `ui-monospace` (with Menlo, Consolas)
 **Mon Font:** Mon3 Anonta 1 (with Pyidaungsu, Noto Sans Myanmar, Myanmar Text, Padauk)
+**Mon Font, landing page:** OngJanehRot leads the same stack (see Landing page).
 
 **Character:** Native Mac system text, quiet and small, so the Mon script set beside it reads as the subject of every surface.
 
@@ -443,3 +510,60 @@ One hand-drawn mark (`brand/hongsasub-icon.svg`, generated as hand-drawn line wo
 - **Uses:** the app and Dock icons (`src-tauri/icons`, made from `brand/hongsasub-icon-1024.png`), the favicon and in-app mark (`public/hongsa.svg`, cropped to the tile), the toolbar (22px) and the welcome screen (88px). `Brand.tsx` loads the same file for both sizes.
 - The Paper theme's palette is taken from this mark: paper cream, sepia ink, Mon red and gold.
 - **Don't** redraw it with clean geometric strokes, recolour the sun or the bird, or drop the subtitle strokes under the bird.
+
+## Landing page
+
+The project's public page (`site/index.html`, `site/styles.css`, `site/app.js`) is a persuade surface built in the same world as the app: the same Paper and Dark token values, the same signal colours, the same key caps and line icons. It is a scrolling page, not a fixed workspace, so it adds its own type scale, radii and layout. Everything in this section is landing-only; the app rules above stay as written.
+
+### Themes
+- Follows `prefers-color-scheme` (Paper by day, Dark at night) with a manual toggle in the nav: an icon button that cycles follow system, Paper and Dark, remembered in local storage. An inline script sets `data-theme` before first paint, and the theme-color meta carries the window colour of each scheme.
+- Tokens are defined three times so no state flashes: Paper on `:root`, Dark on `:root[data-theme="dark"]`, and Dark again under `prefers-color-scheme: dark` for `:root:not([data-theme="paper"])`.
+- The app screenshots ship as a Paper and a Dark pair; the page shows the one that matches the current theme, and a segmented control above them lets the reader flip.
+
+### Mon font
+- **OngJanehRot** is self-hosted from the project's `Fonts/` folder: regular from `011_OngJanehRot_Uni-Regular` (weight 400) and bold from `028` (weights 600–700), both `font-display: swap`.
+- Its `unicode-range` is limited to the Myanmar and Mon blocks (U+1000–109F, U+A9E0–A9FF, U+AA60–AA7F) plus the zero-width joiners (U+200B–200D), so Latin never falls into it.
+- It leads the Mon stack (`mon-ledger`, `mon-live` tokens), with Mon3 Anonta 1 and the rest of the app's stack behind it. The same family ships in the repository with the app since commit 7527703.
+
+### Type scale
+- **Display** (`landing-display`): the one h1, 600 weight, 40–68px fluid, tight 1.03 leading, -0.022em tracking, at most 17ch, balanced. 36px on phones.
+- **Headline** (`landing-headline`): section h2s, 600 weight, 30–44px fluid, 1.08 leading. Both use the system display face, the Mac app category's own type.
+- **Lead** (`landing-lead`): 17–19px at 1.55, secondary ink, at most 60ch. 16px on phones.
+- **Body** (`landing-body`): 16px at 1.55. Supporting text steps down to 15, 14 and 13px; h3 is 16px semibold.
+- **Ledger Mon** (`mon-ledger`): 30–34px at 1.6 in the memory rows. **Live-row Mon** (`mon-live`): 34–40px at 1.6, the largest text on the page after the headline.
+- Inline Mon inside Latin copy (lead, footer) is set 1.12em so it matches the Latin x-height.
+
+**The Mon Leads Rule.** On the landing page Mon is set at 30px or more wherever it is the subject, and always larger than the English beside it (ledger 30–34 over 16, live row 34–40 over 18, match card 28–38 over 16).
+
+### Live-row tokens
+The live row sits on the selection colour (`row-selection`), where the standard secondary ink, warning red and tag blue fall below WCAG AA. Inside the live row only, four tokens re-tint them:
+- `live-2` replaces secondary text, `live-3` replaces tertiary text and the ghosted offer, `live-red` replaces deleted words in the diff, `live-blue` replaces score badge and context tag text.
+- Paper values: `live-2` `#4d2f22`, `live-3` `#5a3c2d`, `live-red` `#9c3209`, `live-blue` `#234a70`. Dark values are the frontmatter tokens.
+
+**The Selection Re-tint Rule.** Anything set on the selection colour takes the live tokens, never the pane tokens; a new element in the live row inherits them by sitting inside it.
+
+### Layout
+- Content is capped at 1240px with a fluid 20–48px gutter. The nav is 56px, sticky, on the window colour with a hairline bottom edge.
+- Sections alternate window and pane backgrounds, separated by a 1px separator line, with 72–128px fluid vertical padding.
+- The hero is a two-column grid (text left, a 300–400px get column right with the GitHub button, the copyable `git clone` command and the alpha note), bottom-aligned. The ledger runs full width directly below it, so its rows reach the fold.
+- Breakpoints: 1100px drops the ledger's provenance column; 960px stacks every two-column layout; 760px hides nav links and the ledger header and reflows rows to English over Mon and score; 420px tightens the large button and key list.
+
+### Shapes
+Landing radii sit one step larger than the app's because the page is read, not worked: buttons and icon buttons 8px (`landing-control`), the large button, command and code blocks 10px (`landing-large`), screenshots, the checklist and big key caps 12px (`landing-frame`), the match showcase card and big-key tiles 14px (`landing-card`). Badges and tags keep the app's 4px, pills are 22px capsules.
+
+### Elevation
+The app's flat rule holds for every section, ledger row and list. Two exhibits cast the pop shadow, as macOS windows do: the app screenshots and the match showcase card, each with a strong inset hairline. Nothing else on the page has a shadow beyond the button bevel and selected segment.
+
+### The ledger (signature)
+The page's first viewport after the headline is the translation memory itself, drawn as the app's line grid at reading size.
+- **Bar:** "Memory" title at 14px semibold, a tabular line count, and the demo source credit at right, all in tertiary ink.
+- **Header:** 32px on the raised pane, 12px semibold tertiary: English, Mon, Match, From. Columns `0.95fr 1.4fr 168px 168px` with 28px gaps; the row padding aligns with the page's content edge.
+- **Rows:** English at 16px secondary, Mon at ledger size, the score badge (solid green 100%, blue-tinted below), and provenance in 13px tertiary ("Your Name · used once"). Hairline between rows; four rows show.
+- **Live row:** on the selection colour, focusable, 22px top padding. English at 18px primary with the memory's source beneath ("Memory has:" with deleted words struck in red). The Mon cell first shows the offered match ghosted at live size in tertiary ink at 80% opacity; using the match replaces it with the Mon text and a red-struck diff, and the status pill moves Untranslated, Draft, Confirmed. Score badge and context tags ("Same scene", "This film") sit beside it, then the timecode in mono.
+- **Actions:** a polite live hint at left, then **Use match ⌘1** as a small graphite button and **Confirm and next ⌘↵** as the one primary button, each with its key cap (Ctrl+1 and Ctrl+Enter off Mac). Keys 1 and Enter work while the live row has focus.
+- **Demo control:** the demo auto-plays once the live row is 60% in view, pauses when it leaves, stops for good on any manual action, and has a Pause demo / Play demo button. Under reduced motion it never auto-plays and opens on the applied match.
+
+### Motion
+One authored motion: a line being remembered. The next line drops into the live row (8px fall and fade, 520ms); the confirmed line settles into the ledger beneath it on a soft green wash (10px fall, 900ms), or, when the memory already holds it, the existing row flashes the same green wash and its use count rises (1100ms). All on the shared `cubic-bezier(0.22, 1, 0.36, 1)` ease. Hover and state changes elsewhere are 140–200ms colour transitions. Reduced motion collapses every animation and transition to 1ms and turns off smooth scrolling.
+
+**The One Motion Rule.** The ledger's remember sequence is the only choreographed motion on the page. Sections, screenshots and cards do not animate in on scroll.

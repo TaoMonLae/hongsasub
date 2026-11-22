@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HongsaSub — the subtitle editor that remembers your Mon</title>
+<meta name="description" content="A free, open-source desktop subtitle editor for translating films from English into Mon, with video, waveform timing and a translation memory that offers your own lines back.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#efe3c9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="HongsaSub — the subtitle editor that remembers your Mon">
+<meta property="og:description" content="Translate film subtitles from English into Mon beside the playing video. Every line you confirm is remembered and offered back.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="img/favicon-64.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="preload" href="fonts/ongjanehrot-regular.ttf" as="font" type="font/ttf" crossorigin>
+<script>
+try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="nav__in">
+    <a class="brand" href="#top" aria-label="HongsaSub, back to top">
+      <img src="img/icon-256.webp" width="28" height="28" alt="">
+      <span>HongsaSub</span>
+    </a>
+    <nav class="nav__links" aria-label="Sections">
+      <a href="#memory">Memory</a>
+      <a href="#timing">Timing</a>
+      <a href="#checks">Checks</a>
+      <a href="#keyboard">Keyboard</a>
+      <a href="#get">Get it</a>
+    </nav>
+    <div class="nav__end">
+      <button class="iconbtn" type="button" id="theme" aria-label="Appearance: follow system">
+        <svg class="i-auto" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.6"/><path d="M8 2.4v11.2a5.6 5.6 0 0 0 0-11.2z" class="fill"/></svg>
+        <svg class="i-paper" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.9"/><path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.5 3.5l1.1 1.1M11.4 11.4l1.1 1.1M3.5 12.5l1.1-1.1M11.4 4.6l1.1-1.1"/></svg>
+        <svg class="i-dark" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8z"/></svg>
+      </button>
+      <a class="btn btn--quiet" href="https://github.com/TaoMonLae/hongsasub">
+        <svg viewBox="0 0 16 16" aria-hidden="true" class="gh"><path d="M8 .2a8 8 0 0 0-2.5 15.6c.4 0 .5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.4-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.3 1.9.9 2.3.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-4 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.5 7.5 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.1 0 3.1-1.9 3.7-3.6 3.9.3.3.6.8.6 1.5v2.2c0 .2.1.5.6.4A8 8 0 0 0 8 .2z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="hero__in">
+      <div class="hero__copy">
+        <h1 id="hero-title">The subtitle editor that remembers your Mon.</h1>
+        <p class="lead">Translate film subtitles from English into Mon (<span class="mon">ဘာသာမန်</span>) beside the playing video. Every line you confirm goes into a translation memory, so the same or a similar line is never translated twice, in this film or the next one.</p>
+      </div>
+      <div class="hero__get">
+        <a class="btn btn--primary btn--large" href="https://github.com/TaoMonLae/hongsasub">
+          <svg viewBox="0 0 16 16" aria-hidden="true" class="gh"><path d="M8 .2a8 8 0 0 0-2.5 15.6c.4 0 .5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.4-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.3 1.9.9 2.3.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-4 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.5 7.5 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.1 0 3.1-1.9 3.7-3.6 3.9.3.3.6.8.6 1.5v2.2c0 .2.1.5.6.4A8 8 0 0 0 8 .2z"/></svg>
+          Get HongsaSub on GitHub
+        </a>
+        <div class="cmd">
+          <code>git clone https://github.com/TaoMonLae/hongsasub.git</code>
+          <button class="copy" type="button" data-copy="git clone https://github.com/TaoMonLae/hongsasub.git" aria-label="Copy the clone command">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.3" y="5.3" width="8" height="8" rx="1.6"/><path d="M10.7 5.3V3.9a1.2 1.2 0 0 0-1.2-1.2H3.9a1.2 1.2 0 0 0-1.2 1.2v5.6a1.2 1.2 0 0 0 1.2 1.2h1.4"/></svg>
+            <span class="copy__done">Copied</span>
+          </button>
+        </div>
+        <p class="note">Free and open source, MIT or Apache-2.0. Early alpha, built from source for macOS, Windows and Linux. <a href="#get">How to build it</a></p>
+      </div>
+    </div>
+
+    <div class="ledger" id="ledger" aria-labelledby="ledger-title">
+      <div class="ledger__bar">
+        <h2 class="ledger__title" id="ledger-title">Memory</h2>
+        <span class="ledger__stats"><span data-count>783</span> lines</span>
+        <span class="ledger__src">Demo · lines from a Mon translation of <i>Your Name</i> (2016)</span>
+        <button class="plain" type="button" id="demo-toggle" aria-pressed="false">Pause demo</button>
+      </div>
+      <div class="ledger__head" aria-hidden="true">
+        <span>English</span><span>Mon</span><span>Match</span><span>From</span>
+      </div>
+
+      <div class="live" id="live" tabindex="0" data-step="0" aria-describedby="live-hint" aria-label="Demo line. Press 1 to use the memory match, Enter to confirm.">
+        <div class="row live__row">
+          <div class="cell cell--en">
+            <p class="en" data-en>I hate this town!</p>
+            <p class="src" data-src>I hate this town! <del>I hate this life!</del></p>
+          </div>
+          <div class="cell cell--mon">
+            <p class="mon mon--live" data-mon lang="mnw"></p>
+            <p class="mon ghost" data-ghost lang="mnw"><span class="sr">Offered by memory: </span><span data-ghost-text>အဲဍုဟ်ဍုၚ်ဏံကွေံ! အဲဍုဟ်ဘဝအဲဏံကွေံ!</span></p>
+          </div>
+          <div class="cell cell--score">
+            <span class="score" data-score>74%</span>
+            <span class="tags" data-tags><span class="tag">Same scene</span><span class="tag">This film</span></span>
+          </div>
+          <div class="cell cell--from">
+            <span class="tc" data-tc>0:00:18.40</span>
+            <span class="pill" data-pill><i></i><span>Untranslated</span></span>
+          </div>
+        </div>
+        <div class="live__act">
+          <p class="hint" id="live-hint" aria-live="polite" data-hint>Memory found a 74% match from the same scene.</p>
+          <button class="btn btn--small" type="button" data-act="apply">Use match <kbd data-mac="⌘1" data-pc="Ctrl+1">⌘1</kbd></button>
+          <button class="btn btn--small btn--primary" type="button" data-act="confirm" disabled>Confirm and next <kbd data-mac="⌘↵" data-pc="Ctrl+Enter">⌘↵</kbd></button>
+        </div>
+      </div>
+
+      <ol class="rows" id="rows" aria-label="Lines already in memory">
+        <li class="row" data-key="itomori">
+          <div class="cell cell--en"><p class="en">Itomori, the Town that Vanished</p></div>
+          <div class="cell cell--mon"><p class="mon" lang="mnw">အိထဵုမဵုရိ, ဍုၚ်သုန်ဂြံ ကၠေံဗ္ဒမ်အာ</p></div>
+          <div class="cell cell--score"><span class="score score--exact">100%</span></div>
+          <div class="cell cell--from"><span class="film">Your Name · <span data-used>used once</span></span></div>
+        </li>
+        <li class="row">
+          <div class="cell cell--en"><p class="en">I hate this town! I hate this life!</p></div>
+          <div class="cell cell--mon"><p class="mon" lang="mnw">အဲဍုဟ်ဍုၚ်ဏံကွေံ! အဲဍုဟ်ဘဝအဲဏံကွေံ!</p></div>
+          <div class="cell cell--score"><span class="score score--exact">100%</span></div>
+          <div class="cell cell--from"><span class="film">Your Name · used once</span></div>
+        </li>
+        <li class="row">
+          <div class="cell cell--en"><p class="en">What? Who's it from? Tsukasa? Who's that?</p></div>
+          <div class="cell cell--mon"><p class="mon" lang="mnw">မု? နူညးဂှ်ရော? Tsukasa ဟာ? ညးဂှ်ရော?</p></div>
+          <div class="cell cell--score"><span class="score score--exact">100%</span></div>
+          <div class="cell cell--from"><span class="film">Your Name · used once</span></div>
+        </li>
+        <li class="row">
+          <div class="cell cell--en"><p class="en">Please make me a handsome Tokyo boy in my next life!</p></div>
+          <div class="cell cell--mon"><p class="mon" lang="mnw">ဘဝဂတဏံကဵုအဲဂွံဒှ် ဗၠာဲကျေဝ်ကျေဝ် ပ္ဍဲ ဍုၚ်တဵုကျဵုတေံညိ!</p></div>
+          <div class="cell cell--score"><span class="score score--exact">100%</span></div>
+          <div class="cell cell--from"><span class="film">Your Name · used once</span></div>
+        </li>
+        <li class="row">
+          <div class="cell cell--en"><p class="en">Comet to pass by in a month: visible to the naked eye</p></div>
+          <div class="cell cell--mon"><p class="mon" lang="mnw">တၟအ်စက္ကဝါတံ တတ်ပြဟ်လ္တူဍုၚ်ပိုဲတုဲ: ပိုဲဆဵုညာတ်နကဵုမတ်ပိုဲမာန်ဏောၚ်</p></div>
+          <div class="cell cell--score"><span class="score score--exact">100%</span></div>
+          <div class="cell cell--from"><span class="film">Your Name · used once</span></div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="memory" aria-labelledby="memory-title">
+    <div class="sec__in split">
+      <div class="split__text">
+        <h2 id="memory-title">Every match shows its reasons.</h2>
+        <p class="lead">Matches, terms and differences stay in view beside the line you are translating, never behind a click. You decide in a glance whether your old line fits the new one.</p>
+        <ul class="facts">
+          <li><strong>Scores and word diffs.</strong> See exactly which English words changed since you last translated a line like this one.</li>
+          <li><strong>Same scene, this film.</strong> Context tags tell you when a match comes from the lines around it or from the same film.</li>
+          <li><strong>Fill from memory.</strong> Fill every untranslated line the memory already knows as a draft. You choose exact, 95% or 85%, and one undo removes them all.</li>
+          <li><strong>Teach memory from finished work.</strong> Pair an English subtitle with your finished Mon one by timing, review the doubtful pairs, and add them.</li>
+          <li><strong>Glossary and dictionary.</strong> Keep agreed names and places, and look up any word in the built-in <a href="https://github.com/Barnista/MonDictDB">MonDict</a> of 26,000 words.</li>
+        </ul>
+      </div>
+      <figure class="matchcard" aria-label="A memory match as it appears in HongsaSub">
+        <div class="matchcard__top">
+          <span class="score">74%</span><span class="tag">Same scene</span><span class="tag">This film</span>
+          <kbd class="matchcard__key" data-mac="⌘1" data-pc="Ctrl+1">⌘1</kbd>
+        </div>
+        <p class="mon matchcard__mon" lang="mnw">အဲဍုဟ်ဍုၚ်ဏံကွေံ! အဲဍုဟ်ဘဝအဲဏံကွေံ!</p>
+        <p class="matchcard__en">I hate this town! <del>I hate this life!</del></p>
+        <p class="matchcard__meta">Your Name · used once</p>
+        <figcaption>A memory match in the inspector: score, context, the Mon you wrote, and the English words that differ.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="sec sec--well" id="timing" aria-labelledby="timing-title">
+    <div class="sec__in">
+      <div class="sec__head">
+        <h2 id="timing-title">Timed to the picture.</h2>
+        <p class="lead">The film plays beside the line you are writing, with its waveform and the Mon and English tracks underneath. Drag a line or its edges and it snaps to its neighbours, the playhead, and where speech starts and stops.</p>
+      </div>
+      <div class="stage">
+        <div class="seg" role="group" aria-label="Screenshot appearance">
+          <button type="button" data-shot="paper" aria-pressed="false">Paper, by day</button>
+          <button type="button" data-shot="dark" aria-pressed="false">Dark, at night</button>
+        </div>
+        <picture class="shot shot--paper"><source media="(max-width: 760px)" srcset="img/app-paper-crop.webp" width="1220" height="960"><img src="img/app-paper-1400.webp" srcset="img/app-paper-1400.webp 1400w, img/app-paper-2400.webp 2400w" sizes="(min-width: 1340px) 1240px, 94vw" width="2400" height="1500" loading="lazy" decoding="async" alt="HongsaSub in the Paper theme: the video with its caption, the English and Mon line editor, a memory match, the waveform timeline and the list of lines."></picture>
+        <picture class="shot shot--dark"><source media="(max-width: 760px)" srcset="img/app-dark-crop.webp" width="1220" height="960"><img src="img/app-dark-1400.webp" srcset="img/app-dark-1400.webp 1400w, img/app-dark-2400.webp 2400w" sizes="(min-width: 1340px) 1240px, 94vw" width="2400" height="1500" loading="lazy" decoding="async" alt="HongsaSub in the Dark theme: the video with its caption, the English and Mon line editor, a memory match, the waveform timeline and the list of lines."></picture>
+      </div>
+      <ul class="captions">
+        <li><strong>Video preview.</strong> Styled captions over the film, zoom from 25% to 200%. MKV and HEVC films are converted once with ffmpeg, then cached.</li>
+        <li><strong>Waveform timeline.</strong> Mon, English and audio on three tracks. Untranslated lines show as hatched outlines, so gaps are easy to find.</li>
+        <li><strong>Shift, split, merge.</strong> Move every timing for a different release, split long lines and merge short ones, with undo for each change.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec" id="checks" aria-labelledby="checks-title">
+    <div class="sec__in checks">
+      <div class="checks__text">
+        <h2 id="checks-title">Check before you ship.</h2>
+        <p class="lead">HongsaSub reads the whole film for the mistakes viewers notice. Most problems have a one-click fix.</p>
+        <div class="spell">
+          <h3>Mon spell-check</h3>
+          <p>Mon text is split into syllables and matched against the dictionary, so typos such as a doubled final consonant are underlined as you type. Words you use often in your memory are learned automatically.</p>
+        </div>
+        <div class="spell">
+          <h3>Session pace</h3>
+          <p>See lines per hour and an estimate of the time left in the film.</p>
+        </div>
+      </div>
+      <ul class="checklist" aria-label="Quality checks">
+        <li><span class="dot dot--red"></span><span><strong>Reading speed</strong> Characters per second over the limit, counting Mon base characters only.</span></li>
+        <li><span class="dot dot--amber"></span><span><strong>Line length and rows</strong> Lines too long for the screen, or too many rows in one caption.</span></li>
+        <li><span class="dot dot--amber"></span><span><strong>Time on screen</strong> Captions shown too briefly to read, or long after the speech ends.</span></li>
+        <li><span class="dot dot--red"></span><span><strong>Overlaps and small gaps</strong> Captions that collide or flicker between each other.</span></li>
+        <li><span class="dot dot--amber"></span><span><strong>Tags and spaces</strong> Broken formatting tags and stray spaces.</span></li>
+        <li><span class="dot dot--amber"></span><span><strong>Numbers</strong> Numbers in Mon that differ from the English line.</span></li>
+        <li><span class="dot dot--blue"></span><span><strong>Glossary consistency</strong> An agreed term translated differently from one line to the next.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec sec--well" id="keyboard" aria-labelledby="keyboard-title">
+    <div class="sec__in">
+      <div class="sec__head sec__head--row">
+        <div>
+          <h2 id="keyboard-title">Your hands stay on the keys.</h2>
+          <p class="lead">Routine work never needs the mouse. Confirm, move, play the line and use a match without looking away from the film.</p>
+        </div>
+        <div class="seg" role="group" aria-label="Keyboard">
+          <button type="button" data-os="mac" aria-pressed="true">Mac</button>
+          <button type="button" data-os="pc" aria-pressed="false">Windows and Linux</button>
+        </div>
+      </div>
+      <div class="bigkeys">
+        <div class="bigkey">
+          <span class="caps"><kbd data-mac="⌘" data-pc="Ctrl">⌘</kbd><kbd data-mac="↵" data-pc="Enter">↵</kbd></span>
+          <span class="bigkey__label">Confirm the line and go to the next</span>
+        </div>
+        <div class="bigkey">
+          <span class="caps"><kbd data-mac="⌘" data-pc="Ctrl">⌘</kbd><kbd>1</kbd><span class="to">to</span><kbd>9</kbd></span>
+          <span class="bigkey__label">Use a memory match</span>
+        </div>
+      </div>
+      <ul class="keys" aria-label="More keyboard shortcuts">
+        <li><kbd data-mac="⌥↑ ⌥↓" data-pc="Alt+↑ Alt+↓">⌥↑ ⌥↓</kbd><span>Move between lines</span></li>
+        <li><kbd data-mac="⌥P" data-pc="Alt+P">⌥P</kbd><span>Play the current line</span></li>
+        <li><kbd>Space</kbd><span>Play or pause</span></li>
+        <li><kbd data-mac="⌘Z ⌘⇧Z" data-pc="Ctrl+Z Ctrl+Shift+Z">⌘Z ⌘⇧Z</kbd><span>Undo and redo</span></li>
+        <li><kbd data-mac="⌘B ⌘I ⌘U" data-pc="Ctrl+B Ctrl+I Ctrl+U">⌘B ⌘I ⌘U</kbd><span>Bold, italic, underline</span></li>
+        <li><kbd data-mac="⌘D" data-pc="Ctrl+D">⌘D</kbd><span>Look up the selected word</span></li>
+        <li><kbd data-mac="⌘G" data-pc="Ctrl+G">⌘G</kbd><span>Add the selection to the glossary</span></li>
+        <li><kbd data-mac="⌘F" data-pc="Ctrl+F">⌘F</kbd><span>Search the memory</span></li>
+        <li><kbd data-mac="⌘⇧H" data-pc="Ctrl+Shift+H">⌘⇧H</kbd><span>Find and replace</span></li>
+        <li><kbd data-mac="⌘⇧F" data-pc="Ctrl+Shift+F">⌘⇧F</kbd><span>Switch between Focus and Timing</span></li>
+        <li><kbd data-mac="⌘S ⌘O ⌘E" data-pc="Ctrl+S Ctrl+O Ctrl+E">⌘S ⌘O ⌘E</kbd><span>Save, open, export</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec" id="get" aria-labelledby="get-title">
+    <div class="sec__in get">
+      <div class="get__text">
+        <h2 id="get-title">Get HongsaSub.</h2>
+        <p class="lead">HongsaSub is in early alpha and used for real film work. Build it from source; installers come later. Keep backups of your <code>.hongsa</code> projects while formats settle.</p>
+        <p class="private">Your translation memory, glossary, style library and word list stay on your computer, in the app's data folder. Nothing is sent anywhere.</p>
+        <h3>You will need</h3>
+        <ul class="needs">
+          <li><a href="https://rustup.rs">Rust</a> (stable)</li>
+          <li><a href="https://nodejs.org">Node.js</a> 20 or later and <a href="https://pnpm.io">pnpm</a></li>
+          <li><a href="https://ffmpeg.org">ffmpeg</a> for video and waveforms. Without it you can still translate and export.</li>
+          <li>The <a href="https://tauri.app/start/prerequisites/">Tauri 2 prerequisites</a> for your system</li>
+        </ul>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="steps__label">Run it from source</span>
+          <div class="code">
+            <pre><code>git clone https://github.com/TaoMonLae/hongsasub.git
+cd hongsasub
+pnpm install
+pnpm tauri dev</code></pre>
+            <button class="copy" type="button" data-copy="git clone https://github.com/TaoMonLae/hongsasub.git&#10;cd hongsasub&#10;pnpm install&#10;pnpm tauri dev" aria-label="Copy the commands to run HongsaSub">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.3" y="5.3" width="8" height="8" rx="1.6"/><path d="M10.7 5.3V3.9a1.2 1.2 0 0 0-1.2-1.2H3.9a1.2 1.2 0 0 0-1.2 1.2v5.6a1.2 1.2 0 0 0 1.2 1.2h1.4"/></svg>
+              <span class="copy__done">Copied</span>
+            </button>
+          </div>
+        </li>
+        <li>
+          <span class="steps__label">Build the app</span>
+          <div class="code">
+            <pre><code>pnpm tauri build</code></pre>
+            <button class="copy" type="button" data-copy="pnpm tauri build" aria-label="Copy the build command">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.3" y="5.3" width="8" height="8" rx="1.6"/><path d="M10.7 5.3V3.9a1.2 1.2 0 0 0-1.2-1.2H3.9a1.2 1.2 0 0 0-1.2 1.2v5.6a1.2 1.2 0 0 0 1.2 1.2h1.4"/></svg>
+              <span class="copy__done">Copied</span>
+            </button>
+          </div>
+          <p class="steps__note">The installer is written to <code>target/release/bundle/</code>.</p>
+        </li>
+        <li>
+          <span class="steps__label">Help it grow</span>
+          <p class="steps__note">Bug reports, Mon language corrections and pull requests are welcome. Read the <a href="https://github.com/TaoMonLae/hongsasub/blob/main/CONTRIBUTING.md">contributing guide</a>.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot__in">
+    <div class="foot__brand">
+      <img src="img/icon-256.webp" width="44" height="44" alt="" loading="lazy">
+      <p><strong>HongsaSub</strong><br>Made for the Mon language, <span class="mon">ဘာသာမန်</span>.</p>
+    </div>
+    <ul class="foot__links">
+      <li><a href="https://github.com/TaoMonLae/hongsasub">Source on GitHub</a></li>
+      <li><a href="https://github.com/TaoMonLae/hongsasub/blob/main/CONTRIBUTING.md">Contributing</a></li>
+      <li><a href="https://github.com/TaoMonLae/hongsasub/blob/main/SECURITY.md">Security</a></li>
+      <li><a href="https://github.com/TaoMonLae/hongsasub#license">MIT or Apache-2.0</a></li>
+    </ul>
+    <p class="foot__credit">The Mon dictionary comes from <a href="https://github.com/Barnista/MonDictDB">MonDictDB</a> by Barnista (MIT). Built with Tauri, React and SQLite.</p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
