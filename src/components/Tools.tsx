@@ -77,6 +77,7 @@ export function ReplaceModal({
     return out;
   }, [events, pattern, replace]);
   const total = hits.reduce((n, h) => n + h.count, 0);
+  const changes = hits.some((h) => h.after !== h.ev.text);
 
   const run = () => {
     const patches = new Map<string, Partial<SubtitleEvent>>();
@@ -136,7 +137,7 @@ export function ReplaceModal({
         <button className="btn" onClick={onClose}>
           Close
         </button>
-        <button className="btn btn--primary" disabled={hits.length === 0} onClick={run}>
+        <button className="btn btn--primary" disabled={!changes} onClick={run}>
           Replace all
         </button>
       </div>

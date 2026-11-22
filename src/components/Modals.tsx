@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { api, errorText, type CommitRequest, type OpenMode, type PairFlag, type PairingPreview } from "../lib/api";
-import { plainText } from "../lib/text";
+import { fileName, plainText } from "../lib/text";
 import { formatTime } from "../lib/time";
 
-export function Shell({ title, children, onClose, wide }: { title: string; children: React.ReactNode; onClose: () => void; wide?: boolean }) {
+export function Shell({ title, children, onClose, wide, cardClass }: { title: string; children: React.ReactNode; onClose: () => void; wide?: boolean; cardClass?: string }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -12,16 +12,12 @@ export function Shell({ title, children, onClose, wide }: { title: string; child
   }, [onClose]);
   return (
     <div className="modal" onMouseDown={wide ? undefined : onClose}>
-      <div className={`modal__card${wide ? " modal__card--review" : ""}`} role="dialog" aria-modal="true" aria-label={title} onMouseDown={(e) => e.stopPropagation()}>
+      <div className={`modal__card${wide ? " modal__card--review" : ""}${cardClass ? ` ${cardClass}` : ""}`} role="dialog" aria-modal="true" aria-label={title} onMouseDown={(e) => e.stopPropagation()}>
         <h2>{title}</h2>
         {children}
       </div>
     </div>
   );
-}
-
-function fileName(path: string) {
-  return path.split(/[\\/]/).pop() ?? path;
 }
 
 export function OpenModeModal({ path, onPick, onClose }: { path: string; onPick: (mode: OpenMode) => void; onClose: () => void }) {

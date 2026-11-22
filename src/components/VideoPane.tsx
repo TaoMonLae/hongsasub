@@ -105,7 +105,8 @@ export function VideoPane(props: Props) {
             src={video.src}
             preload="auto"
             onLoadedMetadata={(e) => {
-              onLoaded(e.currentTarget.duration * 1000);
+              const length = e.currentTarget.duration;
+              onLoaded(Number.isFinite(length) ? length * 1000 : 0);
               setNatural({ w: e.currentTarget.videoWidth, h: e.currentTarget.videoHeight });
             }}
             onPlay={() => onPlaying(true)}

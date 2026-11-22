@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { memo, useMemo, useRef } from "react";
 import type { SubtitleEvent } from "../lib/api";
 import { formatShort, formatTime } from "../lib/time";
 import {
@@ -31,6 +31,16 @@ interface Props {
 
 export const MIN_PPS = 8;
 export const MAX_PPS = 400;
+
+const OverviewBars = memo(function OverviewBars({ dialogue, span }: { dialogue: SubtitleEvent[]; span: number }) {
+  return (
+    <svg viewBox={`0 0 ${span} 10`} preserveAspectRatio="none" aria-hidden>
+      {dialogue.map((e) => (
+        <rect key={e.id} className={`ov ov--${e.status}`} x={e.start} y={0} width={Math.max(span / 1500, e.end - e.start)} height={10} />
+      ))}
+    </svg>
+  );
+});
 
 export function Transport(props: Props) {
   const { events, selectedId, time, duration, playing, canPlay, pps, onPps, onToggle, onStep, onMove, onPlayLine, onJump } = props;
@@ -73,11 +83,7 @@ export function Transport(props: Props) {
           tabIndex={-1}
           onPointerDown={(e) => jumpAt(e.clientX)}
         >
-          <svg viewBox={`0 0 ${span} 10`} preserveAspectRatio="none" aria-hidden>
-            {dialogue.map((e) => (
-              <rect key={e.id} className={`ov ov--${e.status}`} x={e.start} y={0} width={Math.max(span / 1500, e.end - e.start)} height={10} />
-            ))}
-          </svg>
+          <OverviewBars dialogue={dialogue} span={span} />
           {selected && <span className="overview__sel" style={{ left: `${(selected.start / span) * 100}%` }} />}
           <span className="overview__head" style={{ left: `${Math.min(100, (time / span) * 100)}%` }} />
         </div>

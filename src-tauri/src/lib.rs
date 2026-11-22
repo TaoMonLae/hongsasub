@@ -69,6 +69,8 @@ pub fn run() {
             commands::style_library_load,
             commands::style_library_save,
             fonts::list_fonts,
+            fonts::bundled_fonts,
+            fonts::bundled_font_data,
             media::video_prepare,
             media::audio_peaks,
             media::video_played,

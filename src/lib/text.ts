@@ -1,3 +1,11 @@
+export function escapeRegex(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function fileName(path: string): string {
+  return path.split(/[\\/]/).pop() ?? path;
+}
+
 export function toEditable(ass: string): string {
   return ass.replace(/\\N/g, "\n");
 }

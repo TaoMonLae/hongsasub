@@ -17,10 +17,10 @@ import {
   type TmStats,
   type VideoProgress,
 } from "./lib/api";
-import { insertAt, isMon, plainText, toEditable, fromEditable } from "./lib/text";
+import { fileName, insertAt, isMon, plainText, toEditable, fromEditable } from "./lib/text";
 import { HongsaIcon, HongsaMark } from "./components/Brand";
-import { AutoThemeIcon, ExportIcon, FilmIcon, FolderIcon, MemoryIcon, MoonIcon, RedoIcon, SaveIcon, SunIcon, UndoIcon } from "./components/Icons";
-import { useTheme, type ThemePref } from "./lib/theme";
+import { ExportIcon, GearIcon, FilmIcon, FolderIcon, MemoryIcon, MoonIcon, RedoIcon, SaveIcon, SunIcon, UndoIcon } from "./components/Icons";
+import { useTheme } from "./lib/theme";
 import { Transport } from "./components/Transport";
 import { ALT, ENTER, MOD, SHIFT } from "./lib/keys";
 import { LineEditor } from "./components/LineEditor";
@@ -37,15 +37,16 @@ import { Timeline } from "./components/Timeline";
 import { VideoPane, type VideoState } from "./components/VideoPane";
 import { StyleManager, type StyleChange } from "./components/StyleManager";
 import { DEFAULT_FIELDS, documentFields, playRes, readFields } from "./lib/styles";
+import { SettingsModal, type SettingsPage } from "./components/Settings";
+import { loadSettings, storeSettings, type Settings } from "./lib/settings";
+import { loadBundledFonts } from "./lib/fonts";
 
-type Modal = { kind: "open-mode"; path: string } | { kind: "export" } | { kind: "import" } | { kind: "styles" } | { kind: "fill" } | { kind: "replace" } | { kind: "shift" } | null;
+type Modal = { kind: "open-mode"; path: string } | { kind: "export" } | { kind: "import" } | { kind: "styles" } | { kind: "fill" } | { kind: "replace" } | { kind: "shift" } | { kind: "settings"; page: SettingsPage } | null;
 type Toast = { text: string; tone: "ok" | "error" } | null;
 type Snapshot = { events: SubtitleEvent[]; styles: Style[]; focusId: string | null };
 type History = { past: Snapshot[]; future: Snapshot[]; group: string | null; at: number };
 
 const HISTORY_LIMIT = 300;
-const NEXT_THEME: Record<ThemePref, ThemePref> = { system: "paper", paper: "dark", dark: "system" };
-const THEME_LABEL: Record<ThemePref, string> = { system: "follows macOS", paper: "Paper", dark: "Dark" };
 const COALESCE_MS = 1200;
 const EMPTY_HISTORY: History = { past: [], future: [], group: null, at: 0 };
 
@@ -69,7 +70,7 @@ function extension(path: string) {
 const VIDEO_FILTER = [{ name: "Video", extensions: ["mp4", "m4v", "mkv", "webm", "mov", "avi", "ts"] }];
 
 function stem(path: string) {
-  return (path.split(/[\\/]/).pop() ?? path).replace(/\.[^.]+$/, "");
+  return fileName(path).replace(/\.[^.]+$/, "");
 }
 
 export default function App() {
@@ -100,6 +101,16 @@ export default function App() {
   const [toast, setToast] = useState<Toast>(null);
   const [memoryRev, setMemoryRev] = useState(0);
   const [pps, setPps] = useState(70);
+  const [settings, setSettingsState] = useState<Settings>(loadSettings);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const setSettings = useCallback((next: Settings) => {
+    setSettingsState(next);
+    storeSettings(next);
+  }, []);
+  useEffect(() => {
+    loadBundledFonts().catch(() => undefined);
+  }, []);
   const { pref: themePref, theme, setPref: setThemePref } = useTheme();
   const [focusLayout, setFocusLayoutState] = useState<boolean>(() => {
     try {
@@ -209,7 +220,7 @@ export default function App() {
     storeLimits(l);
   }, []);
 
-  const videoName = project?.videoPath ? (project.videoPath.split(/[\\/]/).pop() ?? null) : null;
+  const videoName = project?.videoPath ? fileName(project.videoPath) : null;
 
   const notify = useCallback((text: string, tone: "ok" | "error" = "ok") => setToast({ text, tone }), []);
 
@@ -270,7 +281,7 @@ export default function App() {
       if (!p) return;
       const h = historyRef.current;
       const now = Date.now();
-      const extends_ = group !== null && h.group === group && now - h.at < COALESCE_MS;
+      const extends_ = group !== null && h.group === group && (group.startsWith("drag:") || now - h.at < COALESCE_MS);
       if (!extends_) {
         h.past.push({ events: p.document.events, styles: p.document.styles, focusId: id });
         if (h.past.length > HISTORY_LIMIT) h.past.shift();
@@ -351,6 +362,7 @@ export default function App() {
       h.group = null;
       setProject({ ...p, document: { ...p.document, events: snap.events, styles: snap.styles } });
       if (snap.focusId && snap.events.some((e) => e.id === snap.focusId)) setSelectedId(snap.focusId);
+      else if (!snap.events.some((e) => e.id === selectedIdRef.current)) setSelectedId(snap.events[0]?.id ?? null);
       markDirty();
       syncHistorySize();
     },
@@ -405,31 +417,22 @@ export default function App() {
     videoPathRef.current = path;
     setPlaying(false);
     setVideo({ src: null, status: "preparing", progress: null, mode: force ? "transcode" : undefined });
-    if (force) {
-      try {
-        const prepared = await api.videoPrepare(path, true);
-        if (token !== videoTokenRef.current) return;
-        setVideo({ src: prepared.url, path: prepared.path, status: "ready", proxied: prepared.proxied, mode: prepared.mode });
-      } catch (e) {
-        if (token !== videoTokenRef.current) return;
-        setVideo({ src: null, status: "error", message: errorText(e) });
-      }
-      return;
+    if (!force) {
+      setPeaks(null);
+      setPeaksStatus("loading");
+      api
+        .audioPeaks(path)
+        .then((p) => {
+          if (token !== videoTokenRef.current) return;
+          setPeaks(p);
+          setPeaksStatus("ready");
+        })
+        .catch(() => {
+          if (token === videoTokenRef.current) setPeaksStatus("error");
+        });
     }
-    setPeaks(null);
-    setPeaksStatus("loading");
-    api
-      .audioPeaks(path)
-      .then((p) => {
-        if (token !== videoTokenRef.current) return;
-        setPeaks(p);
-        setPeaksStatus("ready");
-      })
-      .catch(() => {
-        if (token === videoTokenRef.current) setPeaksStatus("error");
-      });
     try {
-      const prepared = await api.videoPrepare(path);
+      const prepared = await api.videoPrepare(path, force);
       if (token !== videoTokenRef.current) return;
       setVideo({ src: prepared.url, path: prepared.path, status: "ready", proxied: prepared.proxied, mode: prepared.mode });
     } catch (e) {
@@ -534,13 +537,13 @@ export default function App() {
         } else {
           await api.exportSubtitle(path, p, false);
           if (hasSource) {
-            notify(`Exported ${path.split(/[\\/]/).pop() ?? path}. Save as a HongsaSub project to keep the English and unfinished lines.`);
+            notify(`Exported ${fileName(path)}. Save as a HongsaSub project to keep the English and unfinished lines.`);
             return;
           }
         }
         setProjectPath(path);
         if (revisionRef.current === revision) setDirty(false);
-        const name = path.split(/[\\/]/).pop() ?? path;
+        const name = fileName(path);
         notify(kind === "srt" && p.document.format !== "srt" ? `Saved ${name}. SRT keeps no styles or positions.` : `Saved ${name}`);
       } catch (e) {
         notify(errorText(e), "error");
@@ -550,7 +553,7 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (!dirty || !projectPath || extension(projectPath) !== "hongsa") return;
+    if (!dirty || !projectPath || extension(projectPath) !== "hongsa" || settings.autosaveSeconds <= 0) return;
     const handle = setTimeout(() => {
       const p = projectRef.current;
       if (!p) return;
@@ -562,9 +565,9 @@ export default function App() {
         })
         .catch((e) => notify(`Autosave failed: ${errorText(e)}`, "error"))
         .finally(() => setAutosaveTick((t) => t + 1));
-    }, 45_000);
+    }, settings.autosaveSeconds * 1000);
     return () => clearTimeout(handle);
-  }, [dirty, projectPath, notify, autosaveTick]);
+  }, [dirty, projectPath, notify, autosaveTick, settings.autosaveSeconds]);
 
   const exportTo = useCallback(
     async (format: "ass" | "srt", fallback: boolean) => {
@@ -722,7 +725,7 @@ export default function App() {
           setSuggestions(res);
           const top = res.matches[0];
           const current = projectRef.current?.document.events.find((e) => e.id === id);
-          if (top && top.score === 100 && current && !plainText(current.text)) {
+          if (settingsRef.current.autoFill && top && top.score === 100 && current && !plainText(current.text)) {
             updateEvent(id, { text: top.target, status: "draft" });
           }
         })
@@ -899,6 +902,9 @@ export default function App() {
       } else if (e.altKey && e.code === "KeyP") {
         e.preventDefault();
         playLine();
+      } else if (mod && e.key === ",") {
+        e.preventDefault();
+        setModal({ kind: "settings", page: "general" });
       } else if (mod && e.key.toLowerCase() === "s") {
         e.preventDefault();
         saveProject(e.shiftKey);
@@ -1031,11 +1037,14 @@ export default function App() {
         )}
         <button
           className="icon-btn themeswitch"
-          onClick={() => setThemePref(NEXT_THEME[themePref])}
-          title={`Appearance: ${THEME_LABEL[themePref]}. Click for ${THEME_LABEL[NEXT_THEME[themePref]]}.`}
-          aria-label={`Appearance: ${THEME_LABEL[themePref]}`}
+          onClick={() => setThemePref(theme === "dark" ? "paper" : "dark")}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {themePref === "system" ? <AutoThemeIcon /> : themePref === "paper" ? <SunIcon /> : <MoonIcon />}
+          {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+        </button>
+        <button className="icon-btn" onClick={() => setModal({ kind: "settings", page: "general" })} title={`Settings  ${MOD},`} aria-label="Settings">
+          <GearIcon />
         </button>
         <nav className="actions" aria-label="File">
           {project && (
@@ -1178,7 +1187,8 @@ export default function App() {
             peaksStatus={peaksStatus}
             onSeek={seek}
             onSelect={select}
-            onTiming={(id, start, end) => updateEvent(id, { start, end }, `drag:${id}`)}
+            onTiming={(id, start, end, group) => updateEvent(id, { start, end }, group)}
+            snap={settings.snap}
             theme={theme}
           />
           <SubtitleGrid events={events} selectedId={selectedId} translating={translating} onSelect={select} issues={issuesById} cpsLimit={limits.cps} />
@@ -1211,6 +1221,9 @@ export default function App() {
                 )}
               </p>
             )}
+            <button className="btn btn--plain btn--small welcome__about" onClick={() => setModal({ kind: "settings", page: "about" })}>
+              About HongsaSub
+            </button>
             <dl className="welcome__keys">
               <div>
                 <dt>
@@ -1280,6 +1293,23 @@ export default function App() {
           playResX={resolution.x}
           onChange={updateStyles}
           onNotify={notify}
+          onClose={() => setModal(null)}
+        />
+      )}
+      {modal?.kind === "settings" && (
+        <SettingsModal
+          page={modal.page}
+          onPage={(page) => setModal({ kind: "settings", page })}
+          settings={settings}
+          onSettings={setSettings}
+          themePref={themePref}
+          theme={theme}
+          onTheme={setThemePref}
+          focusLayout={focusLayout}
+          onFocusLayout={setFocusLayout}
+          limits={limits}
+          onLimits={setLimits}
+          stats={stats}
           onClose={() => setModal(null)}
         />
       )}

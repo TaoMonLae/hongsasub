@@ -111,7 +111,7 @@ pub fn preview_documents(source: &SubtitleDocument, target: &SubtitleDocument) -
             let ratio = overlap_ratio(&sources[i], t);
             if ratio >= 0.5 {
                 covered.push(i);
-                if best.map_or(true, |(_, r)| ratio > r) {
+                if best.is_none_or(|(_, r)| ratio > r) {
                     best = Some((i, ratio));
                 }
             }

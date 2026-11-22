@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { SubtitleEvent } from "../lib/api";
 import type { Issue } from "../lib/checks";
 import { cps, plainText } from "../lib/text";
@@ -16,19 +16,18 @@ interface Props {
 const ROW = 34;
 const OVERSCAN = 8;
 
-export function SubtitleGrid({ events, selectedId, translating, onSelect, issues, cpsLimit }: Props) {
+export const SubtitleGrid = memo(function SubtitleGrid({ events, selectedId, translating, onSelect, issues, cpsLimit }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [height, setHeight] = useState(300);
   const [filter, setFilter] = useState<"all" | "todo" | "issues">("all");
 
-  const rows =
-    filter === "todo"
-      ? events.filter((e) => e.kind === "dialogue" && e.status !== "confirmed")
-      : filter === "issues"
-        ? events.filter((e) => issues.has(e.id))
-        : events;
-  const indexById = new Map(events.map((e, i) => [e.id, i]));
+  const pending = useMemo(() => events.filter((e) => e.kind === "dialogue" && e.status !== "confirmed"), [events]);
+  const rows = useMemo(
+    () => (filter === "todo" ? pending : filter === "issues" ? events.filter((e) => issues.has(e.id)) : events),
+    [events, pending, issues, filter],
+  );
+  const indexById = useMemo(() => new Map(events.map((e, i) => [e.id, i])), [events]);
 
   useLayoutEffect(() => {
     const el = scrollRef.current;
@@ -49,7 +48,7 @@ export function SubtitleGrid({ events, selectedId, translating, onSelect, issues
 
   const first = Math.max(0, Math.floor(scrollTop / ROW) - OVERSCAN);
   const last = Math.min(rows.length, Math.ceil((scrollTop + height) / ROW) + OVERSCAN);
-  const todo = events.filter((e) => e.kind === "dialogue" && e.status !== "confirmed").length;
+  const todo = pending.length;
 
   return (
     <section className="grid">
@@ -109,4 +108,4 @@ export function SubtitleGrid({ events, selectedId, translating, onSelect, issues
       </div>
     </section>
   );
-}
+});

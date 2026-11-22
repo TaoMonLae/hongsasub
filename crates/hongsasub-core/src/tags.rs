@@ -111,20 +111,13 @@ pub fn ass_to_html(text: &str) -> String {
     let mut state = State::default();
     let mut rest = text;
     while !rest.is_empty() {
-        if let Some(stripped) = rest.strip_prefix('{') {
-            match stripped.find('}') {
-                Some(close) => {
-                    apply_override(&mut state, &stripped[..close]);
-                    rest = &stripped[close + 1..];
-                    continue;
-                }
-                None => {
-                    rest = "";
-                    continue;
-                }
-            }
+        let block = rest.strip_prefix('{').and_then(|inner| inner.find('}').map(|close| (inner, close)));
+        if let Some((inner, close)) = block {
+            apply_override(&mut state, &inner[..close]);
+            rest = &inner[close + 1..];
+            continue;
         }
-        let end = rest.find('{').unwrap_or(rest.len());
+        let end = if rest.starts_with('{') { rest.len() } else { rest.find('{').unwrap_or(rest.len()) };
         let chunk = &rest[..end];
         match runs.last_mut() {
             Some((s, t)) if *s == state => t.push_str(chunk),

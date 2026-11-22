@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { SubtitleEvent } from "../lib/api";
 import { DEFAULT_LIMITS, RULE_LABELS, type Issue, type Limits, type Rule } from "../lib/checks";
 import { plainText } from "../lib/text";
@@ -26,24 +26,44 @@ const LIMIT_FIELDS: { key: keyof Limits; label: string; unit: string; step: numb
   { key: "minGap", label: "Smallest gap", unit: "ms", step: 10, scale: 1 },
 ];
 
-function LimitsForm({ limits, onLimits }: { limits: Limits; onLimits: (l: Limits) => void }) {
+function LimitInput({ value, step, onCommit }: { value: number; step: number; onCommit: (value: number) => void }) {
+  const shown = String(Number(value.toFixed(2)));
+  const [draft, setDraft] = useState(shown);
+  const focused = useRef(false);
+  useEffect(() => {
+    if (!focused.current) setDraft(shown);
+  }, [shown]);
+  return (
+    <input
+      className="control num"
+      type="number"
+      min={step}
+      step={step}
+      value={draft}
+      onFocus={() => {
+        focused.current = true;
+      }}
+      onBlur={() => {
+        focused.current = false;
+        setDraft(shown);
+      }}
+      onChange={(e) => {
+        setDraft(e.target.value);
+        const v = Number(e.target.value);
+        if (e.target.value.trim() && Number.isFinite(v) && v > 0) onCommit(v);
+      }}
+    />
+  );
+}
+
+export function LimitsForm({ limits, onLimits }: { limits: Limits; onLimits: (l: Limits) => void }) {
   return (
     <div className="checks__limits">
       {LIMIT_FIELDS.map((f) => (
         <label key={f.key} className="checks__limit">
           <span>{f.label}</span>
           <span className="checks__limit-input">
-            <input
-              className="control num"
-              type="number"
-              min={f.step}
-              step={f.step}
-              value={Number((limits[f.key] / f.scale).toFixed(2))}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                if (Number.isFinite(v) && v > 0) onLimits({ ...limits, [f.key]: Math.round(v * f.scale) });
-              }}
-            />
+            <LimitInput value={limits[f.key] / f.scale} step={f.step} onCommit={(v) => onLimits({ ...limits, [f.key]: Math.round(v * f.scale) })} />
             <em>{f.unit}</em>
           </span>
         </label>

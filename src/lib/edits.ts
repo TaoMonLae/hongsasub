@@ -1,13 +1,9 @@
 import type { SubtitleEvent } from "./api";
-import { fromEditable, leadingTags, plainText, toEditable, visibleLength } from "./text";
+import { escapeRegex, fromEditable, leadingTags, plainText, toEditable, visibleLength } from "./text";
 
 export interface FindOptions {
   matchCase: boolean;
   wholeWord: boolean;
-}
-
-function escapeRegex(text: string) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export function findPattern(find: string, opts: FindOptions): RegExp | null {

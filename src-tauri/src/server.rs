@@ -168,7 +168,7 @@ fn handle(out: &mut TcpStream, req: &Request, files: &Mutex<HashMap<String, Path
         let want = remaining.min(buf.len() as u64) as usize;
         let n = file.read(&mut buf[..want])?;
         if n == 0 {
-            break;
+            return Err(std::io::ErrorKind::UnexpectedEof.into());
         }
         out.write_all(&buf[..n])?;
         remaining -= n as u64;

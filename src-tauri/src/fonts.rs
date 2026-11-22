@@ -20,7 +20,7 @@ fn u32_at(b: &[u8], at: usize) -> Option<u32> {
 
 fn decode_name(platform: u16, raw: &[u8]) -> Option<String> {
     let text = if platform == 0 || platform == 3 {
-        let units: Vec<u16> = raw.chunks_exact(2).map(|c| u16::from_be_bytes([c[0], c[1]])).collect();
+        let units: Vec<u16> = raw.as_chunks::<2>().0.iter().map(|c| u16::from_be_bytes([c[0], c[1]])).collect();
         String::from_utf16(&units).ok()?
     } else if platform == 1 {
         raw.iter().map(|&b| b as char).collect()
@@ -130,14 +130,103 @@ pub fn system_families() -> Vec<String> {
     for dir in font_dirs() {
         walk(&dir, 0, &mut found);
     }
-    let mut list: Vec<String> = found.into_iter().collect();
-    list.sort_by_key(|n| n.to_lowercase());
-    list
+    found.into_iter().collect()
+}
+
+pub struct BundledFace {
+    pub family: String,
+    pub weight: &'static str,
+    pub path: PathBuf,
+}
+
+fn weight_of(path: &Path) -> &'static str {
+    let stem = path.file_stem().map(|s| s.to_string_lossy().to_lowercase()).unwrap_or_default();
+    if stem.ends_with("-vf") {
+        "100 900"
+    } else if stem.ends_with("-bold") {
+        "bold"
+    } else {
+        "normal"
+    }
+}
+
+pub fn bundled_faces(dir: &Path) -> Vec<BundledFace> {
+    let Ok(entries) = std::fs::read_dir(dir) else { return Vec::new() };
+    let mut paths: Vec<PathBuf> = entries
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| matches!(p.extension().map(|e| e.to_string_lossy().to_lowercase()).as_deref(), Some("ttf" | "otf")))
+        .collect();
+    paths.sort();
+    let mut seen = BTreeSet::new();
+    let mut faces = Vec::new();
+    for path in paths {
+        let weight = weight_of(&path);
+        for family in families(&path) {
+            if seen.insert((family.clone(), weight)) {
+                faces.push(BundledFace { family, weight, path: path.clone() });
+            }
+        }
+    }
+    faces
+}
+
+fn bundled_dir(app: &tauri::AppHandle) -> Option<PathBuf> {
+    use tauri::Manager;
+    app.path().resolve("fonts", tauri::path::BaseDirectory::Resource).ok()
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BundledFont {
+    pub family: String,
+    pub weight: &'static str,
+    pub file: String,
 }
 
 #[tauri::command]
-pub async fn list_fonts() -> Result<Vec<String>, String> {
-    tauri::async_runtime::spawn_blocking(system_families).await.map_err(|e| e.to_string())
+pub async fn bundled_fonts(app: tauri::AppHandle) -> Result<Vec<BundledFont>, String> {
+    let Some(dir) = bundled_dir(&app) else { return Ok(Vec::new()) };
+    tauri::async_runtime::spawn_blocking(move || {
+        bundled_faces(&dir)
+            .into_iter()
+            .filter_map(|f| {
+                let file = f.path.file_name()?.to_string_lossy().to_string();
+                Some(BundledFont { family: f.family, weight: f.weight, file })
+            })
+            .collect()
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn bundled_font_data(app: tauri::AppHandle, file: String) -> Result<tauri::ipc::Response, String> {
+    let dir = bundled_dir(&app).ok_or("The bundled fonts are not available")?;
+    if file.is_empty() || Path::new(&file).file_name().map(|n| n.to_string_lossy() != file.as_str()).unwrap_or(true) {
+        return Err("That is not a bundled font".into());
+    }
+    let bytes = tauri::async_runtime::spawn_blocking(move || std::fs::read(dir.join(file)))
+        .await
+        .map_err(|e| e.to_string())?
+        .map_err(|e| e.to_string())?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
+#[tauri::command]
+pub async fn list_fonts(app: tauri::AppHandle) -> Result<Vec<String>, String> {
+    let dir = bundled_dir(&app);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut found: BTreeSet<String> = system_families().into_iter().collect();
+        if let Some(dir) = dir {
+            found.extend(bundled_faces(&dir).into_iter().map(|f| f.family));
+        }
+        let mut list: Vec<String> = found.into_iter().collect();
+        list.sort_by_key(|n| n.to_lowercase());
+        list
+    })
+    .await
+    .map_err(|e| e.to_string())
 }
 
 #[cfg(test)]
@@ -150,5 +239,18 @@ mod tests {
         if cfg!(target_os = "macos") {
             assert!(list.iter().any(|n| n == "Helvetica" || n == "Helvetica Neue"), "{list:?}");
         }
+    }
+
+    #[test]
+    fn reads_bundled_faces_once_per_family_and_weight() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../Fonts");
+        if !dir.exists() {
+            return;
+        }
+        let faces = bundled_faces(&dir);
+        assert!(faces.iter().any(|f| f.family == "095_OngJanehRot_Uni" && f.weight == "bold"));
+        assert!(faces.iter().any(|f| f.family == "095_OngJanehRot_Uni" && f.weight == "normal"));
+        assert_eq!(faces.iter().filter(|f| f.family == "053_OngJanehRot_Uni").count(), 1);
+        assert!(faces.iter().any(|f| f.weight == "100 900"));
     }
 }

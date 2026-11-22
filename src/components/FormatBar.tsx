@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { applyColor, applyFont, applyMark, styleColorHex, type ColorSlot, type Edit, type Mark, type Syntax } from "../lib/format";
 import { MOD } from "../lib/keys";
 import type { StyleFields } from "../lib/styles";
+import { useFonts as useLoadedFonts } from "../lib/fonts";
 
 type Apply = (fn: (value: string, start: number, end: number) => Edit) => void;
 
@@ -72,6 +73,7 @@ function FontPopover({ fields, onPick, onClose }: { fields: StyleFields; onPick:
   const [font, setFont] = useState(fields.Fontname);
   const [size, setSize] = useState(fields.Fontsize);
   const ref = useRef<HTMLDivElement>(null);
+  useLoadedFonts([font]);
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       const t = e.target as Element;

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GlossaryTerm, Misspelling, SubtitleEvent } from "../lib/api";
-import { cps, fromEditable, plainText, stripTags, toEditable } from "../lib/text";
+import { cps, escapeRegex, fromEditable, plainText, stripTags, toEditable } from "../lib/text";
 import { formatDuration, formatTime, parseTime } from "../lib/time";
 import { ALT, ENTER, MOD } from "../lib/keys";
 import { CheckIcon, CopyIcon, LoopLineIcon, WarningIcon } from "./Icons";
 import { FormatBar } from "./FormatBar";
 import { applyMark, type Edit, type Syntax } from "../lib/format";
 import type { StyleFields } from "../lib/styles";
+import { useFonts } from "../lib/fonts";
 import type { Issue } from "../lib/checks";
 
 interface Props {
@@ -35,7 +36,7 @@ interface Props {
   onAddWord: (word: string) => void;
 }
 
-function SpellMarks({ value, marks, scrollTop }: { value: string; marks: Misspelling[]; scrollTop: number }) {
+function SpellMarks({ value, marks, scrollTop, fontFamily }: { value: string; marks: Misspelling[]; scrollTop: number; fontFamily: string }) {
   const parts: React.ReactNode[] = [];
   let at = 0;
   marks.forEach((m, i) => {
@@ -46,7 +47,7 @@ function SpellMarks({ value, marks, scrollTop }: { value: string; marks: Misspel
   });
   parts.push(value.slice(at));
   return (
-    <div className="editor__marks mon" aria-hidden style={{ transform: `translateY(${-scrollTop}px)` }}>
+    <div className="editor__marks mon" aria-hidden style={{ transform: `translateY(${-scrollTop}px)`, fontFamily }}>
       {parts}
       {"\u200b"}
     </div>
@@ -95,20 +96,16 @@ function TimeField({ label, value, onCommit }: { label: string; value: number; o
   );
 }
 
-function escapeRegExp(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 function highlightTerms(text: string, terms: GlossaryTerm[], onPick: (t: GlossaryTerm) => void) {
-  if (terms.length === 0) return text;
-  const sorted = [...terms].sort((a, b) => b.source.length - a.source.length);
-  const pattern = new RegExp(`\\b(${sorted.map((t) => escapeRegExp(t.source)).join("|")})\\b`, "gi");
+  const sorted = terms.filter((t) => t.source.trim()).sort((a, b) => b.source.length - a.source.length);
+  if (sorted.length === 0) return text;
+  const pattern = new RegExp(`(?<![\\p{L}\\p{N}])(${sorted.map((t) => escapeRegex(t.source.trim())).join("|")})(?![\\p{L}\\p{N}])`, "giu");
   const parts: React.ReactNode[] = [];
   let last = 0;
   for (const m of text.matchAll(pattern)) {
     const at = m.index ?? 0;
     if (at > last) parts.push(text.slice(last, at));
-    const term = sorted.find((t) => t.source.toLowerCase() === m[0].toLowerCase());
+    const term = sorted.find((t) => t.source.trim().toLowerCase() === m[0].toLowerCase());
     parts.push(
       <button key={at} className="term-mark" onClick={() => term && onPick(term)} title={term ? `Insert ${term.target}` : ""}>
         {m[0]}
@@ -123,6 +120,8 @@ function highlightTerms(text: string, terms: GlossaryTerm[], onPick: (t: Glossar
 export function LineEditor(props: Props) {
   const { event, index, total, terms, translating, styles, editorRef, onChange, onConfirm, onPlayLine, onInsertTerm, onLookUp, syntax, fields, onStyles, issues, onFix, cpsLimit, onSplit, onMerge, canMerge, misspellings, onAddWord } = props;
   const [scrollTop, setScrollTop] = useState(0);
+  useFonts([fields.Fontname]);
+  const fontFamily = `"${fields.Fontname.replace(/["\\]/g, "")}", var(--font-mon)`;
   const editable = toEditable(event.text);
   const marks = misspellings ?? [];
   const unknownWords = [...new Set(marks.map((m) => m.word))];
@@ -215,12 +214,13 @@ export function LineEditor(props: Props) {
         </div>
         <FormatBar syntax={syntax} fields={fields} onApply={applyFormat} onStyles={onStyles} />
         <div className="editor__field">
-        {marks.length > 0 && <SpellMarks value={editable} marks={marks} scrollTop={scrollTop} />}
+        {marks.length > 0 && <SpellMarks value={editable} marks={marks} scrollTop={scrollTop} fontFamily={fontFamily} />}
         <textarea
           id="mon-text"
           onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
           ref={editorRef}
           className="mon"
+          style={{ fontFamily }}
           lang="mnw"
           dir="ltr"
           spellCheck={false}

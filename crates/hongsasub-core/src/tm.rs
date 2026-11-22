@@ -389,7 +389,8 @@ impl TranslationMemory {
         }
         let source_query = normalize_source(q);
         let pattern = format!("%{}%", escape_like(if source_query.is_empty() { q } else { &source_query }));
-        let target_pattern = format!("%{}%", escape_like(&normalize_target(q)));
+        let target_query = normalize_target(q);
+        let target_pattern = format!("%{}%", escape_like(if target_query.is_empty() { q } else { &target_query }));
         let mut stmt = self.conn.prepare(
             "SELECT id, source, target, work, use_count, updated_at FROM segments
              WHERE deleted = 0 AND (source_norm LIKE ?1 ESCAPE '\\' OR target_norm LIKE ?2 ESCAPE '\\')
@@ -686,6 +687,7 @@ mod tests {
         let id = commit(&tm, "I love this village.", "V", "", "");
         commit(&tm, "The village is quiet.", "Q", "", "");
         assert_eq!(tm.concordance("village", 10).unwrap().len(), 2);
+        assert!(tm.concordance("{\\i1}", 10).unwrap().is_empty());
         tm.delete_segment(&id).unwrap();
         assert_eq!(tm.concordance("village", 10).unwrap().len(), 1);
         assert_eq!(tm.stats().unwrap().segments, 1);

@@ -95,6 +95,19 @@ struct Probe {
 }
 
 fn find_tool(name: &str) -> Option<PathBuf> {
+    static FOUND: Mutex<Vec<(String, PathBuf)>> = Mutex::new(Vec::new());
+    let cached = FOUND.lock().ok().and_then(|list| list.iter().find(|(n, _)| n == name).map(|(_, p)| p.clone()));
+    if cached.is_some() {
+        return cached;
+    }
+    let found = locate_tool(name)?;
+    if let Ok(mut list) = FOUND.lock() {
+        list.push((name.to_string(), found.clone()));
+    }
+    Some(found)
+}
+
+fn locate_tool(name: &str) -> Option<PathBuf> {
     let exe = if cfg!(windows) { format!("{name}.exe") } else { name.to_string() };
     let mut candidates: Vec<PathBuf> = vec![PathBuf::from(&exe)];
     for dir in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "C:\\ffmpeg\\bin"] {
@@ -157,7 +170,7 @@ fn choose_mode(ext: &str, probe: &Probe, force_transcode: bool) -> PrepareMode {
     if !video_ok {
         return PrepareMode::Transcode;
     }
-    let audio_ok = probe.audio_codec.as_deref().map_or(true, |a| COPY_AUDIO.contains(&a) || (ext == "webm" && a == "vorbis"));
+    let audio_ok = probe.audio_codec.as_deref().is_none_or(|a| COPY_AUDIO.contains(&a) || (ext == "webm" && a == "vorbis"));
     let hevc_tag_ok = probe.video_codec != "hevc" || probe.video_tag == "hvc1";
     if NATIVE_CONTAINERS.contains(&ext) && audio_ok && hevc_tag_ok {
         PrepareMode::Direct
@@ -209,7 +222,7 @@ fn prune_cache(cache_dir: &Path, keep: &Path) {
         if path == keep {
             continue;
         }
-        let expired = modified.elapsed().map_or(false, |age| age > CACHE_MAX_AGE);
+        let expired = modified.elapsed().is_ok_and(|age| age > CACHE_MAX_AGE);
         if (expired || total > CACHE_LIMIT_BYTES) && std::fs::remove_file(&path).is_ok() {
             total = total.saturating_sub(len);
         }
@@ -233,7 +246,7 @@ fn remove_stale_parts(cache_dir: &Path) {
         if !name.contains(".part") {
             continue;
         }
-        let old = entry.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).map_or(true, |age| age > day);
+        let old = entry.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).is_none_or(|age| age > day);
         if old {
             let _ = std::fs::remove_file(entry.path());
         }
@@ -393,6 +406,7 @@ fn read_peaks(source: &Path) -> Result<Peaks, String> {
     let mut carry: Vec<u8> = Vec::new();
     let mut current = 0i32;
     let mut count = 0usize;
+    let level = |peak: i32| ((peak as f32 / 32768.0).sqrt() * 255.0).min(255.0) as u8;
     loop {
         let n = stdout.read(&mut buf).map_err(|e| e.to_string())?;
         if n == 0 {
@@ -400,12 +414,12 @@ fn read_peaks(source: &Path) -> Result<Peaks, String> {
         }
         carry.extend_from_slice(&buf[..n]);
         let usable = carry.len() - carry.len() % 2;
-        for chunk in carry[..usable].chunks_exact(2) {
+        for chunk in carry[..usable].as_chunks::<2>().0 {
             let sample = i16::from_le_bytes([chunk[0], chunk[1]]) as i32;
             current = current.max(sample.abs());
             count += 1;
             if count == per_bucket {
-                peaks.push(((current as f32 / 32768.0).sqrt() * 255.0).min(255.0) as u8);
+                peaks.push(level(current));
                 current = 0;
                 count = 0;
             }
@@ -413,7 +427,7 @@ fn read_peaks(source: &Path) -> Result<Peaks, String> {
         carry.drain(..usable);
     }
     if count > 0 {
-        peaks.push(((current as f32 / 32768.0).sqrt() * 255.0).min(255.0) as u8);
+        peaks.push(level(current));
     }
     let _ = child.wait();
     Ok(Peaks { rate: PEAK_RATE, peaks })

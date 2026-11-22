@@ -393,7 +393,11 @@ export function StyleManager({ styles, styleFormat, usage, srt, playResX, onChan
                   setStorage(moveItem(storage, storageSel, to));
                   setStorageSel(to);
                 }}
-                onSort={() => setStorage([...storage].sort((a, b) => a.name.localeCompare(b.name)))}
+                onSort={() => {
+                  const sorted = [...storage].sort((a, b) => a.name.localeCompare(b.name));
+                  setStorage(sorted);
+                  setStorageSel(sorted.indexOf(storage[storageSel]));
+                }}
               />
             </div>
             <button className="btn btn--block" onClick={copyToScript} disabled={storageSel < 0}>
@@ -418,7 +422,11 @@ export function StyleManager({ styles, styleFormat, usage, srt, playResX, onChan
                   setScript(moveItem(styles, scriptSel, to));
                   setScriptSel(to);
                 }}
-                onSort={() => setScript([...styles].sort((a, b) => a.name.localeCompare(b.name)))}
+                onSort={() => {
+                  const sorted = [...styles].sort((a, b) => a.name.localeCompare(b.name));
+                  setScript(sorted);
+                  setScriptSel(sorted.indexOf(styles[scriptSel]));
+                }}
               />
             </div>
             <div className="stylemgr__pair">
@@ -504,6 +512,17 @@ function NumberField({ label, field, fields, set, step = 1, min }: { label: stri
       <input className="control num" type="number" step={step} min={min} value={fields[field]} onChange={(e) => set(field, e.target.value)} />
     </label>
   );
+}
+
+const NUMERIC_FIELDS: StyleField[] = ["Fontsize", "ScaleX", "ScaleY", "Spacing", "Angle", "Outline", "Shadow", "MarginL", "MarginR", "MarginV", "Encoding"];
+
+function cleanFields(fields: StyleFields, fallback: StyleFields): StyleFields {
+  const out = { ...fields, Fontname: fields.Fontname.trim() || fallback.Fontname };
+  for (const key of NUMERIC_FIELDS) {
+    const value = fields[key].trim();
+    out[key] = value !== "" && Number.isFinite(Number(value)) ? value : fallback[key];
+  }
+  return out;
 }
 
 function StyleEditor({ initial, taken, usage, playResX, onSave, onCancel }: { initial: StyleFields; taken: string[]; usage: number; playResX: number; onSave: (f: StyleFields) => void; onCancel: () => void }) {
@@ -631,7 +650,7 @@ function StyleEditor({ initial, taken, usage, playResX, onSave, onCancel }: { in
           <button className="btn" onClick={onCancel}>
             Cancel
           </button>
-          <button className="btn btn--primary" disabled={Boolean(nameProblem)} onClick={() => onSave({ ...fields, Name: name })}>
+          <button className="btn btn--primary" disabled={Boolean(nameProblem)} onClick={() => onSave(cleanFields({ ...fields, Name: name }, initial))}>
             Save style
           </button>
         </div>

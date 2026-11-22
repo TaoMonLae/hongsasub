@@ -129,11 +129,24 @@ pub async fn dict_info(state: State<'_, DictState>) -> CmdResult<DictInfo> {
     with_dict(&state, |d| d.info())
 }
 
-fn spell_words_path(app: &tauri::AppHandle) -> CmdResult<PathBuf> {
+fn data_file(app: &tauri::AppHandle, name: &str) -> CmdResult<PathBuf> {
     use tauri::Manager;
     let dir = app.path().app_data_dir().map_err(err)?;
     std::fs::create_dir_all(&dir).map_err(err)?;
-    Ok(dir.join("spell_words.json"))
+    Ok(dir.join(name))
+}
+
+fn write_json(path: &std::path::Path, value: &impl serde::Serialize) -> CmdResult<()> {
+    let tmp = path.with_extension("json.tmp");
+    std::fs::write(&tmp, serde_json::to_vec_pretty(value).map_err(err)?).map_err(err)?;
+    std::fs::rename(&tmp, path).map_err(|e| {
+        let _ = std::fs::remove_file(&tmp);
+        err(e)
+    })
+}
+
+fn spell_words_path(app: &tauri::AppHandle) -> CmdResult<PathBuf> {
+    data_file(app, "spell_words.json")
 }
 
 fn user_words(app: &tauri::AppHandle) -> Vec<String> {
@@ -183,10 +196,7 @@ pub async fn spell_add(app: tauri::AppHandle, spell: State<'_, SpellState>, word
     let mut words = user_words(&app);
     if !words.contains(&word) {
         words.push(word.clone());
-        let path = spell_words_path(&app)?;
-        let tmp = path.with_extension("json.tmp");
-        std::fs::write(&tmp, serde_json::to_vec_pretty(&words).map_err(err)?).map_err(err)?;
-        std::fs::rename(&tmp, &path).map_err(err)?;
+        write_json(&spell_words_path(&app)?, &words)?;
     }
     if let Some(checker) = spell.checker.lock().map_err(err)?.as_mut() {
         checker.add(&word);
@@ -208,10 +218,7 @@ pub async fn read_styles(path: String) -> CmdResult<ScriptStyles> {
 }
 
 fn style_library_path(app: &tauri::AppHandle) -> CmdResult<PathBuf> {
-    use tauri::Manager;
-    let dir = app.path().app_data_dir().map_err(err)?;
-    std::fs::create_dir_all(&dir).map_err(err)?;
-    Ok(dir.join("styles.json"))
+    data_file(app, "styles.json")
 }
 
 #[tauri::command]
@@ -226,8 +233,5 @@ pub async fn style_library_load(app: tauri::AppHandle) -> CmdResult<serde_json::
 
 #[tauri::command]
 pub async fn style_library_save(app: tauri::AppHandle, library: serde_json::Value) -> CmdResult<()> {
-    let path = style_library_path(&app)?;
-    let tmp = path.with_extension("json.tmp");
-    std::fs::write(&tmp, serde_json::to_vec_pretty(&library).map_err(err)?).map_err(err)?;
-    std::fs::rename(&tmp, &path).map_err(err)
+    write_json(&style_library_path(&app)?, &library)
 }

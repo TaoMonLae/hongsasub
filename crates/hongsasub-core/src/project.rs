@@ -115,7 +115,10 @@ impl Project {
         let path = path.as_ref();
         let tmp = path.with_extension(format!("{PROJECT_EXTENSION}.tmp"));
         std::fs::write(&tmp, serde_json::to_vec_pretty(self)?)?;
-        std::fs::rename(&tmp, path)?;
+        if let Err(e) = std::fs::rename(&tmp, path) {
+            let _ = std::fs::remove_file(&tmp);
+            return Err(e.into());
+        }
         Ok(())
     }
 

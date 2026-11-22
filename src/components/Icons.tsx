@@ -170,13 +170,6 @@ export const MoonIcon = ({ size }: P) => (
   </Svg>
 );
 
-export const AutoThemeIcon = ({ size }: P) => (
-  <Svg size={size}>
-    <circle cx="8" cy="8" r="5.6" />
-    <path d="M8 2.4v11.2a5.6 5.6 0 0 0 0-11.2Z" fill="currentColor" stroke="none" />
-  </Svg>
-);
-
 export const UndoIcon = ({ size }: P) => (
   <Svg size={size}>
     <path d="M5.5 3.5 2.5 6.5l3 3" />
@@ -188,5 +181,13 @@ export const RedoIcon = ({ size }: P) => (
   <Svg size={size}>
     <path d="m10.5 3.5 3 3-3 3" />
     <path d="M13.5 6.5h-7a3.5 3.5 0 0 0 0 7H9" />
+  </Svg>
+);
+
+export const GearIcon = ({ size }: P) => (
+  <Svg size={size}>
+    <path d="M2 4.5h5.2M10.8 4.5H14M2 11.5h2.2M7.8 11.5H14" />
+    <circle cx="9" cy="4.5" r="1.8" />
+    <circle cx="6" cy="11.5" r="1.8" />
   </Svg>
 );

@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { renderText, type RunStyle } from "../lib/render";
 import type { StyleFields } from "../lib/styles";
+import { useFonts } from "../lib/fonts";
 
 function runCss(s: RunStyle, scale: number, box: boolean): CSSProperties {
   const border = s.border * scale;
@@ -38,6 +39,7 @@ interface Props {
 }
 
 export function Caption({ texts, scale }: Props) {
+  useFonts(texts.flatMap((t) => renderText(t.text, t.fields).lines.flatMap((line) => line.map((run) => run.style.font))));
   const groups = new Map<number, { text: string; fields: StyleFields; dim?: boolean; align: number; key: number }[]>();
   texts.forEach((t, key) => {
     const align = renderText(t.text, t.fields).align;

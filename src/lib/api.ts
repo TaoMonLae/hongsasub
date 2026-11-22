@@ -215,6 +215,8 @@ export const api = {
   spellAdd: (word: string) => invoke<void>("spell_add", { word }),
   videoPlayed: (source: string, playing: string) => invoke<void>("video_played", { source, playing }),
   readStyles: (path: string) => invoke<ScriptStyles>("read_styles", { path }),
+  bundledFonts: () => invoke<BundledFont[]>("bundled_fonts"),
+  bundledFontData: (file: string) => invoke<ArrayBuffer>("bundled_font_data", { file }),
   styleLibraryLoad: () => invoke<StyleLibrary | null>("style_library_load"),
   styleLibrarySave: (library: StyleLibrary) => invoke<void>("style_library_save", { library }),
   listFonts: () => {
@@ -227,6 +229,12 @@ export const api = {
 };
 
 let fontsPromise: Promise<string[]> | null = null;
+
+export interface BundledFont {
+  family: string;
+  weight: string;
+  file: string;
+}
 
 export interface ScriptStyles {
   styleFormat: string[];

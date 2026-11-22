@@ -1,5 +1,5 @@
 import type { GlossaryTerm, SubtitleEvent } from "./api";
-import { cps, isMon, plainText, shownText, stripTags, visibleLength } from "./text";
+import { cps, escapeRegex, isMon, plainText, shownText, stripTags, visibleLength } from "./text";
 
 export type Severity = "error" | "warn";
 
@@ -91,10 +91,6 @@ export const RULE_LABELS: Record<Rule, string> = {
   glossary: "Glossary",
   spelling: "Spelling",
 };
-
-function escapeRegex(text: string) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 function glossaryMatcher(terms: GlossaryTerm[]) {
   const bySource = new Map<string, { source: string; targets: string[] }>();

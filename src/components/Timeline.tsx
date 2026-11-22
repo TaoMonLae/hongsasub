@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Peaks, SubtitleEvent } from "../lib/api";
 import { plainText } from "../lib/text";
-import { formatShort } from "../lib/time";
+import { formatDuration, formatShort, formatTime } from "../lib/time";
 import { MAX_PPS, MIN_PPS } from "./Transport";
 
 interface Props {
@@ -17,20 +17,26 @@ interface Props {
   peaksStatus: "idle" | "loading" | "ready" | "error";
   onSeek: (ms: number) => void;
   onSelect: (id: string) => void;
-  onTiming: (id: string, start: number, end: number) => void;
+  onTiming: (id: string, start: number, end: number, group: string) => void;
+  snap: boolean;
   theme: string;
 }
 
-type DragMode = "start" | "end" | "move";
+type DragMode = "start" | "end" | "move" | "scrub";
 type TrackKey = "mon" | "en" | "audio";
 
 interface Drag {
   id: string;
   mode: DragMode;
+  group: string;
   originX: number;
+  originMs: number;
+  lastX: number;
+  free: boolean;
   start: number;
   end: number;
   moved: boolean;
+  points: number[] | null;
 }
 
 interface Track {
@@ -44,6 +50,10 @@ const RULER = 22;
 const AUDIO = 40;
 const MIN_LENGTH = 100;
 const SNAP_PX = 8;
+const EDGE_PX = 36;
+const GRIP_PX = 7;
+
+let dragCount = 0;
 
 function speechEdges(peaks: Peaks | null): number[] {
   if (!peaks || peaks.peaks.length === 0 || peaks.rate <= 0) return [];
@@ -116,7 +126,7 @@ function cssVar(el: Element, name: string, fallback: string) {
 }
 
 export function Timeline(props: Props) {
-  const { events, selectedId, time, duration, playing, translating, pps, onPps, peaks, peaksStatus, onSeek, onSelect, onTiming, theme } = props;
+  const { events, selectedId, time, duration, playing, translating, pps, onPps, peaks, peaksStatus, onSeek, onSelect, onTiming, snap, theme } = props;
   const scrollRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [viewW, setViewW] = useState(800);
@@ -124,6 +134,7 @@ export function Timeline(props: Props) {
   const [scrollLeft, setScrollLeft] = useState(0);
   const dragRef = useRef<Drag | null>(null);
   const [guide, setGuide] = useState<number | null>(null);
+  const [dragging, setDragging] = useState<{ id: string; mode: DragMode } | null>(null);
   const speech = useMemo(() => speechEdges(peaks), [peaks]);
 
   const totalW = Math.max(viewW, (duration / 1000) * pps + 120);
@@ -264,75 +275,156 @@ export function Timeline(props: Props) {
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
+  const live = useRef({ pps, dialogue, speech, time, snap, onTiming, onSeek });
+  live.current = { pps, dialogue, speech, time, snap, onTiming, onSeek };
+
   const msFromClientX = (clientX: number) => {
     const el = scrollRef.current;
     if (!el) return 0;
     const rect = el.getBoundingClientRect();
-    return Math.max(0, ((clientX - rect.left + el.scrollLeft) / pps) * 1000);
+    return Math.max(0, ((clientX - rect.left + el.scrollLeft) / live.current.pps) * 1000);
   };
 
-  const beginDrag = (e: React.PointerEvent, ev: SubtitleEvent, mode: DragMode) => {
-    e.stopPropagation();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    dragRef.current = { id: ev.id, mode, originX: e.clientX, start: ev.start, end: ev.end, moved: false };
-    if (ev.id !== selectedId) onSelect(ev.id);
-  };
-
-  const onPointerMove = (e: React.PointerEvent) => {
+  const applyDrag = () => {
     const drag = dragRef.current;
     if (!drag) return;
-    const dx = e.clientX - drag.originX;
-    if (Math.abs(dx) > 2) drag.moved = true;
+    const now = live.current;
+    const at = msFromClientX(drag.lastX);
+    if (drag.mode === "scrub") {
+      now.onSeek(at);
+      return;
+    }
     if (!drag.moved) return;
-    const delta = Math.round(((dx / pps) * 1000) / 10) * 10;
-    const range = (SNAP_PX / pps) * 1000;
-    const points = e.altKey
-      ? []
-      : [...dialogue.filter((d) => d.id !== drag.id).flatMap((d) => [d.start, d.end]), time, ...speech].sort((a, b) => a - b);
-    const snap = (v: number) => nearest(points, v, range);
+    const delta = Math.round((at - drag.originMs) / 10) * 10;
+    const range = (SNAP_PX / now.pps) * 1000;
+    drag.points ??= [...now.dialogue.filter((d) => d.id !== drag.id).flatMap((d) => [d.start, d.end]), now.time, ...now.speech].sort((x, y) => x - y);
+    const points = drag.free || !now.snap ? [] : drag.points;
+    const near = (v: number) => nearest(points, v, range);
     let start = drag.start;
     let end = drag.end;
     let hit: number | null = null;
     if (drag.mode === "start") {
       const raw = drag.start + delta;
-      hit = snap(raw);
+      hit = near(raw);
       start = Math.min(drag.end - MIN_LENGTH, Math.max(0, hit ?? raw));
+      if (start !== hit) hit = null;
     }
     if (drag.mode === "end") {
       const raw = drag.end + delta;
-      hit = snap(raw);
+      hit = near(raw);
       end = Math.max(drag.start + MIN_LENGTH, hit ?? raw);
+      if (end !== hit) hit = null;
     }
     if (drag.mode === "move") {
       let shift = Math.max(-drag.start, delta);
-      const a = snap(drag.start + shift);
-      const b = snap(drag.end + shift);
+      const a = near(drag.start + shift);
+      const b = near(drag.end + shift);
       const da = a === null ? Infinity : Math.abs(a - (drag.start + shift));
       const db = b === null ? Infinity : Math.abs(b - (drag.end + shift));
       if (a !== null && da <= db) {
-        shift = Math.max(-drag.start, a - drag.start);
+        shift = a - drag.start;
         hit = a;
-      } else if (b !== null) {
-        shift = Math.max(-drag.start, b - drag.end);
+      } else if (b !== null && b - drag.end >= -drag.start) {
+        shift = b - drag.end;
         hit = b;
       }
       start = drag.start + shift;
       end = drag.end + shift;
     }
     setGuide(hit);
-    onTiming(drag.id, start, end);
+    now.onTiming(drag.id, start, end, drag.group);
+  };
+
+  const startDrag = (e: React.PointerEvent, id: string, mode: DragMode, start: number, end: number) => {
+    dragCount += 1;
+    dragRef.current = {
+      id,
+      mode,
+      group: `drag:${id}:${dragCount}`,
+      originX: e.clientX,
+      originMs: msFromClientX(e.clientX),
+      lastX: e.clientX,
+      free: e.altKey,
+      start,
+      end,
+      moved: false,
+      points: null,
+    };
+    setDragging({ id, mode });
+  };
+
+  const beginDrag = (e: React.PointerEvent, ev: SubtitleEvent, mode: DragMode) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    startDrag(e, ev.id, mode, ev.start, ev.end);
+    if (ev.id !== selectedId) onSelect(ev.id);
+  };
+
+  const beginScrub = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (e.button !== 0 || e.clientY > el.getBoundingClientRect().top + el.clientHeight) return;
+    el.setPointerCapture(e.pointerId);
+    startDrag(e, "", "scrub", 0, 0);
+    onSeek(msFromClientX(e.clientX));
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    drag.lastX = e.clientX;
+    drag.free = e.altKey;
+    if (Math.abs(e.clientX - drag.originX) > 2) drag.moved = true;
+    applyDrag();
   };
 
   const endDrag = () => {
     const drag = dragRef.current;
     dragRef.current = null;
     setGuide(null);
+    setDragging(null);
     if (drag && !drag.moved && drag.mode === "move") onSeek(drag.start);
   };
 
+  useEffect(() => {
+    if (!dragging) return;
+    const el = scrollRef.current;
+    let frame = 0;
+    const tick = () => {
+      const drag = dragRef.current;
+      if (el && drag && (drag.moved || drag.mode === "scrub")) {
+        const rect = el.getBoundingClientRect();
+        const over = drag.lastX < rect.left + EDGE_PX ? drag.lastX - rect.left - EDGE_PX : drag.lastX > rect.right - EDGE_PX ? drag.lastX - rect.right + EDGE_PX : 0;
+        if (over !== 0) {
+          const before = el.scrollLeft;
+          el.scrollLeft = before + Math.max(-28, Math.min(28, over * 0.5));
+          if (el.scrollLeft !== before) applyDrag();
+        }
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    const onKey = (e: KeyboardEvent) => {
+      const drag = dragRef.current;
+      if (e.key !== "Escape" || !drag) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (drag.moved && drag.mode !== "scrub") live.current.onTiming(drag.id, drag.start, drag.end, drag.group);
+      dragRef.current = null;
+      setGuide(null);
+      setDragging(null);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("keydown", onKey, true);
+    };
+  }, [dragging]);
+
   const visibleFrom = ((scrollLeft - 200) / pps) * 1000;
   const visibleTo = ((scrollLeft + viewW + 200) / pps) * 1000;
-  const visible = dialogue.filter((ev) => ev.end >= visibleFrom && ev.start <= visibleTo);
+  const visible = dialogue.filter((ev) => (ev.end >= visibleFrom && ev.start <= visibleTo) || ev.id === dragging?.id);
+  const dragged = dragging && dragging.mode !== "scrub" ? dialogue.find((ev) => ev.id === dragging.id) : undefined;
   const textTracks = tracks.filter((t) => t.key !== "audio");
   const audioNote =
     peaksStatus === "loading" ? "Reading audio…" : peaksStatus === "error" ? "No waveform: ffmpeg not found" : peaksStatus === "idle" ? "No video" : "";
@@ -340,7 +432,7 @@ export function Timeline(props: Props) {
   return (
     <section className="timeline" aria-label="Timeline">
       <div className="timeline__heads" style={{ gridTemplateRows: `${RULER}px ${tracks.map((t) => `${t.height}px`).join(" ")}` }}>
-        <span className="timeline__corner" title="Drag a clip to move it, drag its edges to retime. Edges snap to other lines, the playhead and speech; hold Option to drag freely. Ctrl + scroll zooms.">
+        <span className="timeline__corner" title="Drag a clip to move it, drag its edges to retime. Edges snap to other lines, the playhead and speech; hold Option to drag freely, press Esc to cancel. Drag empty space to scrub. Ctrl + scroll zooms.">
           Tracks
         </span>
         {tracks.map((t) => (
@@ -352,16 +444,14 @@ export function Timeline(props: Props) {
         ))}
       </div>
       <div
-        className="timeline__scroll"
+        className={`timeline__scroll${dragging ? ` is-${dragging.mode === "scrub" ? "scrubbing" : "dragging"}` : ""}`}
         ref={scrollRef}
         onScroll={(e) => setScrollLeft(e.currentTarget.scrollLeft)}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onLostPointerCapture={endDrag}
-        onPointerDown={(e) => {
-          if (e.button === 0) onSeek(msFromClientX(e.clientX));
-        }}
+        onPointerDown={beginScrub}
       >
         <div className="timeline__inner" style={{ width: totalW }}>
           <canvas className="timeline__canvas" ref={canvasRef} style={{ width: viewW, height: viewH }} />
@@ -373,26 +463,32 @@ export function Timeline(props: Props) {
               const top = track.top + 4 + lane * (h + 3) + (inner - laneCount * (h + 3) + 3) / 2;
               const left = (ev.start / 1000) * pps;
               const width = Math.max(4, ((ev.end - ev.start) / 1000) * pps);
+              const grip = Math.min(GRIP_PX, Math.max(2, width / 3));
               const isMon = track.key === "mon";
               const text = isMon ? plainText(ev.text) : plainText(ev.source);
               const statusClass = isMon ? ` clip--${translating ? ev.status : "confirmed"}` : " clip--source";
               return (
                 <div
                   key={`${track.key}-${ev.id}`}
-                  className={`clip${statusClass}${ev.id === selectedId ? " is-selected" : ""}`}
+                  className={`clip${statusClass}${ev.id === selectedId ? " is-selected" : ""}${ev.id === dragging?.id ? " is-dragging" : ""}`}
                   style={{ left, width, top, height: h }}
                   onPointerDown={(e) => beginDrag(e, ev, "move")}
                   title={text || "Untranslated"}
                 >
-                  <span className="clip__handle clip__handle--start" onPointerDown={(e) => beginDrag(e, ev, "start")} />
+                  <span className="clip__handle clip__handle--start" style={{ width: grip }} onPointerDown={(e) => beginDrag(e, ev, "start")} />
                   <span className={`clip__label${isMon && text ? " mon" : ""}`}>{text}</span>
-                  <span className="clip__handle clip__handle--end" onPointerDown={(e) => beginDrag(e, ev, "end")} />
+                  <span className="clip__handle clip__handle--end" style={{ width: grip }} onPointerDown={(e) => beginDrag(e, ev, "end")} />
                 </div>
               );
             }),
           )}
           <div className="playhead" style={{ left: (time / 1000) * pps }} />
           {guide !== null && <div className="snapguide" style={{ left: (guide / 1000) * pps }} aria-hidden />}
+          {dragged && (
+            <div className="dragtip num" style={{ left: (dragged.start / 1000) * pps }} aria-hidden>
+              {formatTime(dragged.start)} – {formatTime(dragged.end)} · {formatDuration(dragged.end - dragged.start)}
+            </div>
+          )}
         </div>
       </div>
     </section>
