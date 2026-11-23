@@ -500,6 +500,8 @@ select.control {
 }
 
 .doc__title {
+  flex: 0 4 auto;
+  min-width: 6ch;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -523,6 +525,7 @@ select.control {
   gap: 6px;
   color: var(--text-3);
   font-size: 12px;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
@@ -532,8 +535,20 @@ select.control {
 }
 
 .doc__work .control {
-  width: 15ch;
-  min-width: 8ch;
+  width: 24ch;
+  min-width: 16ch;
+  flex: 0 1 auto;
+  text-overflow: ellipsis;
+  transition: width 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.doc__work .control:focus {
+  width: 36ch;
+  text-overflow: clip;
+}
+
+.doc:focus-within .doc__title {
+  flex-shrink: 50;
 }
 
 .progress {
@@ -2273,6 +2288,14 @@ select.control {
   .overview__legend {
     display: none;
   }
+
+  .progress__track {
+    display: none;
+  }
+
+  .doc__work > span:not(.doc__work-icon) {
+    display: none;
+  }
 }
 
 @media (max-width: 1320px) {
@@ -2281,7 +2304,12 @@ select.control {
   }
 
   .doc__work .control {
-    width: 11ch;
+    width: 18ch;
+    min-width: 14ch;
+  }
+
+  .doc__work .control:focus {
+    width: 28ch;
   }
 
   .doc__title {

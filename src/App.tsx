@@ -985,6 +985,7 @@ export default function App() {
               <input
                 className="control"
                 value={project.work}
+                title={project.work || undefined}
                 placeholder="Film title"
                 onChange={(e) => setWork(e.target.value)}
                 spellCheck={false}
