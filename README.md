@@ -17,7 +17,7 @@ Every line you confirm goes into a translation memory, so the same or a similar 
 [![Release](https://img.shields.io/github/v/release/TaoMonLae/hongsasub?style=flat-square&label=release&color=2f9e44)](https://github.com/TaoMonLae/hongsasub/releases/latest)
 [![Language](https://img.shields.io/badge/made_for-Mon_language-c8323a?style=flat-square)](https://en.wikipedia.org/wiki/Mon_language)
 
-[Download for macOS](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) · [Get started](#get-started) · [Features](#features) · [Keyboard](#keyboard) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+[Download for macOS](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) · [Download for Windows](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe) · [Watch the video](https://youtu.be/ZdCRqhHLn78) · [Get started](#get-started) · [Features](#features) · [Keyboard](#keyboard) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 <br>
 
@@ -67,7 +67,13 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 
 For video playback and waveforms, also install [ffmpeg](https://ffmpeg.org), for example with `brew install ffmpeg`. Without it you can still translate and export.
 
-On Windows and Linux, build it from source as below. Every version is on the [releases page](https://github.com/TaoMonLae/hongsasub/releases).
+### Download for Windows
+
+[Download HongsaSub 1.0 for Windows](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe) for Windows 10 and 11, 64-bit, and run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose **More info**, then **Run anyway**.
+
+For video playback and waveforms, also install [ffmpeg](https://ffmpeg.org), for example with `winget install Gyan.FFmpeg`. Without it you can still translate and export.
+
+On Linux, build it from source as below. Every version is on the [releases page](https://github.com/TaoMonLae/hongsasub/releases).
 
 ### Build from source
 
@@ -136,7 +142,7 @@ Your translation memory, glossary, style library and personal word list stay on 
 
 ## Status
 
-HongsaSub **1.0** is the first release, used for real film work. Mac downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases); Windows and Linux builds come from source for now. Keep backups of your `.hongsa` projects.
+HongsaSub **1.0** is the first release, used for real film work. Mac and Windows downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases); Linux builds come from source for now. Keep backups of your `.hongsa` projects.
 
 ## Contributing
 

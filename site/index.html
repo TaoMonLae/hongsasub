@@ -21,7 +21,7 @@
 <script>
 try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -33,6 +33,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
       <span>HongsaSub</span>
     </a>
     <nav class="nav__links" aria-label="Sections">
+      <a href="#watch">Video</a>
       <a href="#memory">Memory</a>
       <a href="#timing">Timing</a>
       <a href="#checks">Checks</a>
@@ -61,12 +62,18 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
         <p class="lead">Translate film subtitles from English into Mon (<span class="mon">ဘာသာမန်</span>) beside the playing video. Every line you confirm goes into a translation memory, so the same or a similar line is never translated twice, in this film or the next one.</p>
       </div>
       <div class="hero__get">
-        <a class="btn btn--primary btn--large" href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg">
-          <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
-          Download for macOS
-        </a>
-        <p class="get-meta">Version 1.0 · Apple Silicon and Intel · macOS 11 or later</p>
-        <p class="note">Free and open source, MIT or Apache-2.0. On Windows and Linux, <a href="#get">build it from source</a>. <a href="https://github.com/TaoMonLae/hongsasub">Source on GitHub</a></p>
+        <div class="dl-row">
+          <a class="btn btn--primary btn--large" data-dl="mac" href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg">
+            <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
+            Download for macOS
+          </a>
+          <a class="btn btn--large" data-dl="win" href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe">
+            <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
+            Download for Windows
+          </a>
+        </div>
+        <p class="get-meta">Version 1.0 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit</p>
+        <p class="note">Free and open source, MIT or Apache-2.0. On Linux, <a href="#get">build it from source</a>. <a href="https://github.com/TaoMonLae/hongsasub">Source on GitHub</a></p>
       </div>
     </div>
 
@@ -139,6 +146,23 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
           <div class="cell cell--from"><span class="film">Your Name · used once</span></div>
         </li>
       </ol>
+    </div>
+  </section>
+
+  <section class="sec sec--well" id="watch" aria-labelledby="watch-title">
+    <div class="sec__in">
+      <div class="sec__head">
+        <h2 id="watch-title">HongsaSub in 90 seconds.</h2>
+        <p class="lead">A desktop subtitle editor for translating films from English into Mon, with video timing, waveform editing and a translation memory that stays on your computer.</p>
+      </div>
+      <div class="video" data-video="ZdCRqhHLn78">
+        <a class="video__poster" href="https://youtu.be/ZdCRqhHLn78" aria-label="Play the HongsaSub promo video, 1 minute 30 seconds">
+          <img src="https://i.ytimg.com/vi/ZdCRqhHLn78/maxresdefault.jpg" width="1280" height="720" loading="lazy" decoding="async" alt="">
+          <span class="video__play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg></span>
+          <span class="video__time" aria-hidden="true">1:30</span>
+        </a>
+      </div>
+      <p class="video__note">The video plays from YouTube when you press play.</p>
     </div>
   </section>
 
@@ -258,7 +282,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
     <div class="sec__in get">
       <div class="get__text">
         <h2 id="get-title">Get HongsaSub.</h2>
-        <p class="lead">Version 1.0 for macOS is signed and notarized by Apple. Open the downloaded <code>.dmg</code> and drag HongsaSub into Applications. On Windows and Linux, build it from source.</p>
+        <p class="lead">Version 1.0 is out for macOS and Windows. The Mac app is signed and notarized by Apple; the Windows app comes with an installer. On Linux, build it from source.</p>
         <p class="private">Your translation memory, glossary, style library and word list stay on your computer, in the app's data folder. Nothing is sent anywhere.</p>
         <h3>To build from source</h3>
         <ul class="needs">
@@ -272,9 +296,18 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
           <span class="steps__label">Install on a Mac</span>
           <a class="btn btn--primary" href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg">
             <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
-            Download HongsaSub 1.0
+            Download for macOS
           </a>
-          <p class="steps__note">For video playback and waveforms, also install <a href="https://ffmpeg.org">ffmpeg</a>, for example with <code>brew install ffmpeg</code>. Without it you can still translate and export. <a href="https://github.com/TaoMonLae/hongsasub/releases">All releases</a></p>
+          <p class="steps__note">Open the <code>.dmg</code> and drag HongsaSub into Applications. For video playback and waveforms, also install <a href="https://ffmpeg.org">ffmpeg</a>, for example with <code>brew install ffmpeg</code>.</p>
+        </li>
+        <li>
+          <span class="steps__label">Install on Windows</span>
+          <a class="btn btn--primary" href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe">
+            <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
+            Download for Windows
+          </a>
+          <p class="steps__note">Run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose <strong>More info</strong>, then <strong>Run anyway</strong>. For video playback and waveforms, also install <a href="https://ffmpeg.org">ffmpeg</a>, for example with <code>winget install Gyan.FFmpeg</code>.</p>
+          <p class="steps__note">Without ffmpeg you can still translate and export. <a href="https://github.com/TaoMonLae/hongsasub/releases">All releases</a></p>
         </li>
         <li>
           <span class="steps__label">Run it from source</span>
@@ -325,6 +358,6 @@ pnpm tauri dev</code></pre>
   </div>
 </footer>
 
-<script src="app.js" defer></script>
+<script src="app.js?v=2" defer></script>
 </body>
 </html>

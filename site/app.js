@@ -58,6 +58,33 @@
   var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
   setOS(isMac ? "mac" : "pc");
 
+  if (!isMac && /Win/.test(navigator.platform || navigator.userAgent)) {
+    var macDl = document.querySelector('.dl-row [data-dl="mac"]');
+    var winDl = document.querySelector('.dl-row [data-dl="win"]');
+    if (macDl && winDl) {
+      macDl.classList.remove("btn--primary");
+      winDl.classList.add("btn--primary");
+      winDl.parentNode.insertBefore(winDl, macDl);
+    }
+  }
+
+  document.querySelectorAll("[data-video]").forEach(function (box) {
+    var poster = box.querySelector(".video__poster");
+    if (!poster) return;
+    poster.addEventListener("click", function (e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      var frame = document.createElement("iframe");
+      frame.src = "https://www.youtube-nocookie.com/embed/" + box.dataset.video + "?autoplay=1&rel=0&playsinline=1";
+      frame.title = "HongsaSub promo video";
+      frame.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      frame.allowFullscreen = true;
+      frame.referrerPolicy = "strict-origin-when-cross-origin";
+      box.replaceChild(frame, poster);
+      frame.focus();
+    });
+  });
+
   document.querySelectorAll("[data-copy]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var text = btn.dataset.copy;
