@@ -1,0 +1,39 @@
+name: Build Windows installer
+on:
+  push:
+    branches: [build/windows-v1.0.0]
+permissions:
+  contents: read
+jobs:
+  installer:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v1.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tauri build --bundles nsis
+      - name: Verify installation and startup
+        shell: pwsh
+        run: |
+          $installer = Get-Item target/release/bundle/nsis/*-setup.exe
+          $dest = Join-Path $env:RUNNER_TEMP HongsaSub
+          $setup = Start-Process $installer.FullName -ArgumentList "/S","/D=$dest" -PassThru -Wait
+          if ($setup.ExitCode -ne 0) { throw "Installer failed: $($setup.ExitCode)" }
+          $app = Get-Item "$dest/hongsasub.exe"
+          if (!(Test-Path "$dest/mondict.sqlite") -or !(Test-Path "$dest/fonts/*.ttf")) { throw "Missing language resources" }
+          $process = Start-Process $app.FullName -PassThru
+          Start-Sleep -Seconds 10
+          if ($process.HasExited) { throw "App exited during startup" }
+          Stop-Process -Id $process.Id
+          Copy-Item $installer.FullName HongsaSub-windows-x64-setup.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: HongsaSub-windows-x64-setup.exe
