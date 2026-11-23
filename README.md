@@ -14,10 +14,10 @@ Every line you confirm goes into a translation memory, so the same or a similar 
 [![Rust + TypeScript](https://img.shields.io/badge/Rust_%2B_TypeScript-Tauri_2-b7410e?style=flat-square&logo=rust&logoColor=white)](https://tauri.app)
 [![Platforms](https://img.shields.io/badge/macOS_·_Windows_·_Linux-native-2f6fde?style=flat-square)](#install)
 [![License](https://img.shields.io/badge/license-MIT_%2F_Apache--2.0-555?style=flat-square)](#license)
-[![Status](https://img.shields.io/badge/status-early_alpha-e8a317?style=flat-square)](#status)
+[![Release](https://img.shields.io/github/v/release/TaoMonLae/hongsasub?style=flat-square&label=release&color=2f9e44)](https://github.com/TaoMonLae/hongsasub/releases/latest)
 [![Language](https://img.shields.io/badge/made_for-Mon_language-c8323a?style=flat-square)](https://en.wikipedia.org/wiki/Mon_language)
 
-[Get started](#get-started) · [Features](#features) · [Keyboard](#keyboard) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+[Download for macOS](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) · [Get started](#get-started) · [Features](#features) · [Keyboard](#keyboard) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 <br>
 
@@ -61,13 +61,24 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 
 ## Get started
 
-### Requirements
+### Download for macOS
+
+[Download HongsaSub 1.0](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) for macOS 11 or later, on Apple Silicon or Intel. It is signed and notarized by Apple. Open the `.dmg` and drag HongsaSub into Applications.
+
+For video playback and waveforms, also install [ffmpeg](https://ffmpeg.org), for example with `brew install ffmpeg`. Without it you can still translate and export.
+
+On Windows and Linux, build it from source as below. Every version is on the [releases page](https://github.com/TaoMonLae/hongsasub/releases).
+
+### Build from source
+
+Requirements:
+
 - [Rust](https://rustup.rs) (stable)
 - [Node.js](https://nodejs.org) 20+ and [pnpm](https://pnpm.io)
 - [ffmpeg](https://ffmpeg.org) (includes ffprobe) for video playback and waveforms. Without it you can still translate and export.
 - The [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/) for your system
 
-### Run from source
+#### Run from source
 
 ```bash
 git clone https://github.com/TaoMonLae/hongsasub.git
@@ -76,7 +87,7 @@ pnpm install
 pnpm tauri dev
 ```
 
-### Build the app
+#### Build the app
 
 ```bash
 pnpm tauri build
@@ -84,7 +95,7 @@ pnpm tauri build
 
 The installer is written to `target/release/bundle/`.
 
-### Run the tests
+#### Run the tests
 
 ```bash
 cargo test --workspace
@@ -125,7 +136,7 @@ Your translation memory, glossary, style library and personal word list stay on 
 
 ## Status
 
-HongsaSub is in **early alpha**. It is used for real film work, but file formats and features may still change. Keep backups of your `.hongsa` projects.
+HongsaSub **1.0** is the first release, used for real film work. Mac downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases); Windows and Linux builds come from source for now. Keep backups of your `.hongsa` projects.
 
 ## Contributing
 
