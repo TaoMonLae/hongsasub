@@ -536,15 +536,16 @@ export default function App() {
           setProject((cur) => (cur ? { ...cur, updatedAt: saved.updatedAt } : cur));
         } else {
           await api.exportSubtitle(path, p, false);
-          if (hasSource) {
-            notify(`Exported ${fileName(path)}. Save as a HongsaSub project to keep the English and unfinished lines.`);
-            return;
-          }
         }
+        const firstTime = path !== projectPath;
         setProjectPath(path);
         if (revisionRef.current === revision) setDirty(false);
         const name = fileName(path);
-        notify(kind === "srt" && p.document.format !== "srt" ? `Saved ${name}. SRT keeps no styles or positions.` : `Saved ${name}`);
+        if (kind !== "hongsa" && hasSource && firstTime) {
+          notify(`Saved ${name}. Later saves go to this file. It keeps only the Mon text, so save a HongsaSub project to keep the English.`);
+        } else {
+          notify(kind === "srt" && p.document.format !== "srt" ? `Saved ${name}. SRT keeps no styles or positions.` : `Saved ${name}`);
+        }
       } catch (e) {
         notify(errorText(e), "error");
       }
