@@ -21,7 +21,7 @@
 <script>
 try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -71,9 +71,13 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
             <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
             Download for Windows
           </a>
+          <a class="btn btn--large" data-dl="linux" href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb" hidden>
+            <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
+            Download for Linux
+          </a>
         </div>
-        <p class="get-meta">Version 1.1 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit</p>
-        <p class="note">Free and open source, MIT or Apache-2.0. On Linux, <a href="#get">build it from source</a>. <a href="https://github.com/TaoMonLae/hongsasub">Source on GitHub</a></p>
+        <p class="get-meta">Version 1.1 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit · Ubuntu 22.04 and Debian 12 or later</p>
+        <p class="note">Free and open source, MIT or Apache-2.0. On Ubuntu or Debian, <a href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb">download the .deb</a>. <a href="https://github.com/TaoMonLae/hongsasub">Source on GitHub</a></p>
       </div>
     </div>
 
@@ -283,7 +287,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
     <div class="sec__in get">
       <div class="get__text">
         <h2 id="get-title">Get HongsaSub.</h2>
-        <p class="lead">Version 1.1 is out for macOS and Windows, with FFmpeg built in for video and waveforms. The Mac app is signed and notarized by Apple; the Windows app comes with an installer. On Linux, build it from source.</p>
+        <p class="lead">Version 1.1 is out for macOS, Windows and Linux, with FFmpeg for video and waveforms included. The Mac app is signed and notarized by Apple; the Windows app comes with an installer; the Linux app is a <code>.deb</code> package for Ubuntu and Debian.</p>
         <p class="private">Your translation memory, glossary, style library and word list stay on your computer, in the app's data folder. Nothing is sent anywhere. To keep them safe or move them to a new computer, back them up to one file from Settings → Memory.</p>
         <h3>To build from source</h3>
         <ul class="needs">
@@ -309,6 +313,14 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
             Download for Windows
           </a>
           <p class="steps__note">Run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose <strong>More info</strong>, then <strong>Run anyway</strong>. FFmpeg for video and waveforms is included.</p>
+        </li>
+        <li>
+          <span class="steps__label">Install on Linux</span>
+          <a class="btn btn--primary" href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb">
+            <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
+            Download for Linux
+          </a>
+          <p class="steps__note">For 64-bit Ubuntu 22.04 and Debian 12 or later. Install it with <code>sudo apt install ./HongsaSub-linux-amd64.deb</code>, which also installs FFmpeg.</p>
           <p class="steps__note"><a href="https://github.com/TaoMonLae/hongsasub/releases">All releases</a></p>
         </li>
         <li>
@@ -360,6 +372,6 @@ pnpm tauri dev</code></pre>
   </div>
 </footer>
 
-<script src="app.js?v=2" defer></script>
+<script src="app.js?v=3" defer></script>
 </body>
 </html>

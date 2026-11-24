@@ -68,6 +68,17 @@
     }
   }
 
+  if (!isMac && /Linux/.test(navigator.platform || navigator.userAgent) && !/Android/.test(navigator.userAgent)) {
+    var firstDl = document.querySelector('.dl-row [data-dl="mac"]');
+    var linuxDl = document.querySelector('.dl-row [data-dl="linux"]');
+    if (firstDl && linuxDl) {
+      firstDl.classList.remove("btn--primary");
+      linuxDl.classList.add("btn--primary");
+      linuxDl.hidden = false;
+      linuxDl.parentNode.insertBefore(linuxDl, firstDl);
+    }
+  }
+
   document.querySelectorAll("[data-video]").forEach(function (box) {
     var poster = box.querySelector(".video__poster");
     if (!poster) return;
