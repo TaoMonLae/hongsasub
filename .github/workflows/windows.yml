@@ -2,7 +2,7 @@ name: Build Windows installer
 on:
   workflow_dispatch:
   push:
-    tags: ["v*"]
+    branches: [build/windows-v1.1.0]
 permissions:
   contents: read
 jobs:
@@ -31,8 +31,9 @@ jobs:
           $app = Get-Item "$dest/hongsasub.exe"
           if (!(Test-Path "$dest/mondict.sqlite") -or !(Test-Path "$dest/fonts/*.ttf")) { throw "Missing language resources" }
           if (!(Test-Path "$dest/ffmpeg-licence/LICENSE.txt")) { throw "Missing FFmpeg licence" }
-          & "$dest/ffmpeg.exe" -hide_banner -version | Select-Object -First 1
-          & "$dest/ffprobe.exe" -hide_banner -version | Select-Object -First 1
+          & "$dest/ffmpeg.exe" -hide_banner -version
+          if ($LASTEXITCODE -ne 0) { throw "Bundled ffmpeg failed" }
+          & "$dest/ffprobe.exe" -hide_banner -version
           if ($LASTEXITCODE -ne 0) { throw "Bundled FFmpeg does not run" }
           $process = Start-Process $app.FullName -PassThru
           Start-Sleep -Seconds 10
