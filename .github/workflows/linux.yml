@@ -1,0 +1,35 @@
+name: Build Linux deb
+on:
+  push:
+    branches: [build/linux-v1.1.0]
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tauri build --bundles deb --config '{"bundle":{"publisher":"TaoMonLae","shortDescription":"Subtitle editor for translating films into Mon","linux":{"deb":{"depends":["ffmpeg","libwebkit2gtk-4.1-0","libgtk-3-0"]}}}}'
+      - name: Install and launch
+        run: |
+          pkg=$(find target/release/bundle/deb -name '*.deb' -print -quit)
+          test "$(dpkg-deb -f "$pkg" Version)" = "1.1.0"
+          test "$(dpkg-deb -f "$pkg" Architecture)" = "amd64"
+          sudo apt-get install -y "./$pkg"
+          ffprobe -version
+          dpkg -L "$(dpkg-deb -f "$pkg" Package)" > installed-files
+          grep '/mondict.sqlite$' installed-files
+          grep -q '/fonts/.*ttf$' installed-files
+          xvfb-run -a bash -c 'hongsasub & pid=$!; sleep 10; kill -0 "$pid" && kill "$pid"'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb
+          path: target/release/bundle/deb/*.deb
