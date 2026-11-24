@@ -1,3 +1,4 @@
+mod assist;
 mod commands;
 mod fonts;
 mod media;
@@ -23,6 +24,7 @@ pub struct DictState {
 }
 
 pub fn run() {
+    let _ = rustls::crypto::ring::default_provider().install_default();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
@@ -77,6 +79,14 @@ pub fn run() {
             media::video_prepare,
             media::audio_peaks,
             media::video_played,
+            assist::assist_status,
+            assist::assist_configure,
+            assist::assist_set_key,
+            assist::assist_cancel,
+            assist::assist_key_page,
+            assist::assist_custom_models,
+            assist::assist_codex_models,
+            assist::assist_translate,
         ])
         .build(tauri::generate_context!())
         .expect("failed to start HongsaSub")

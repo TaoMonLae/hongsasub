@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getVersion } from "@tauri-apps/api/app";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { api, errorText, type DictInfo, type RestoreSummary, type TmStats } from "../lib/api";
+import { api, errorText, type AssistStatus, type DictInfo, type RestoreSummary, type TmStats } from "../lib/api";
+import { AssistantPage } from "./Assist";
 import type { Limits } from "../lib/checks";
 import { loadBundledFonts } from "../lib/fonts";
 import { ALT, MOD } from "../lib/keys";
@@ -12,7 +13,7 @@ import { HongsaIcon } from "./Brand";
 import { LimitsForm } from "./ChecksPanel";
 import { Shell } from "./Modals";
 
-export type SettingsPage = "general" | "editing" | "checks" | "memory" | "about";
+export type SettingsPage = "general" | "editing" | "checks" | "memory" | "assistant" | "about";
 
 interface Props {
   page: SettingsPage;
@@ -28,6 +29,8 @@ interface Props {
   onLimits: (limits: Limits) => void;
   stats: TmStats | null;
   onMemoryChanged: () => void;
+  assistStatus: AssistStatus | null;
+  onAssistRefresh: (full?: boolean) => Promise<AssistStatus | null>;
   onClose: () => void;
 }
 
@@ -36,6 +39,7 @@ const PAGES: { id: SettingsPage; label: string }[] = [
   { id: "editing", label: "Editing" },
   { id: "checks", label: "Checks" },
   { id: "memory", label: "Memory" },
+  { id: "assistant", label: "Assistant" },
   { id: "about", label: "About" },
 ];
 
@@ -235,7 +239,7 @@ function About({ stats }: { stats: TmStats | null }) {
 }
 
 export function SettingsModal(props: Props) {
-  const { page, onPage, settings, onSettings, themePref, theme, onTheme, focusLayout, onFocusLayout, limits, onLimits, stats, onMemoryChanged, onClose } = props;
+  const { page, onPage, settings, onSettings, themePref, theme, onTheme, focusLayout, onFocusLayout, limits, onLimits, stats, onMemoryChanged, assistStatus, onAssistRefresh, onClose } = props;
   const set = (patch: Partial<Settings>) => onSettings({ ...settings, ...patch });
   return (
     <Shell title={page === "about" ? "About HongsaSub" : "Settings"} onClose={onClose} cardClass="modal__card--settings">
@@ -302,6 +306,7 @@ export function SettingsModal(props: Props) {
           </>
         )}
         {page === "memory" && <MemoryPage stats={stats} onChanged={onMemoryChanged} />}
+        {page === "assistant" && <AssistantPage status={assistStatus} onRefresh={onAssistRefresh} Row={Row} />}
         {page === "about" && <About stats={stats} />}
       </div>
       <div className="modal__actions">

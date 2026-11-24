@@ -39,6 +39,7 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 - **Fill from memory.** Fill every untranslated line that memory already knows as a draft. You choose how close a match must be (exact, 95%+ or 85%+), and one undo removes them all.
 - **Teach memory from finished work.** Pair an English subtitle with your finished Mon one by timing, review doubtful pairs (merged lines, numbers that differ, lines left untranslated) and add them to memory.
 - **Glossary and dictionary.** Keep agreed terms for names and places. Look up any Mon or English word in the built-in [MonDict](https://github.com/Barnista/MonDictDB) dictionary of 26,000 words (`⌘D`).
+- **AI assistant (optional).** Ask ChatGPT, Claude or Gemini for a Mon translation of the current line (`⌘J`), or draft every untranslated line at once. It reads your memory, glossary and the lines around each line, and everything it writes arrives as a draft for you to check. Use a ChatGPT plan through OpenAI's [Codex](https://developers.openai.com/codex) app (choose any model your plan offers, and how hard it thinks), a free Gemini key from [Google AI Studio](https://aistudio.google.com/apikey) (no card needed), an OpenAI, Claude or paid Gemini API key, or any other service with an OpenAI-compatible API (OpenRouter, DeepSeek, Mistral, Groq, xAI, Together AI, or models on your own computer through Ollama or LM Studio); set it up in **Settings → Assistant**. On a free Gemini key, Google may use what you send to improve its products. Keys are kept in your system's keychain. Claude Pro and Max plans and Google AI Pro and Ultra plans can't be used, because Anthropic and Google don't allow other apps to use them.
 
 ### Check before you ship
 - **Quality checks.** Reading speed, line length, rows per line, too short or too long on screen, overlaps, small gaps, broken tags, stray spaces, numbers that differ from the English, and glossary terms translated inconsistently. Most problems have a one-click fix.
@@ -64,15 +65,15 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 
 ### Download for macOS
 
-[Download HongsaSub 1.1](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) for macOS 11 or later, on Apple Silicon or Intel. It is signed and notarized by Apple. Open the `.dmg` and drag HongsaSub into Applications. FFmpeg for video and waveforms is included.
+[Download HongsaSub 1.2](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) for macOS 11 or later, on Apple Silicon or Intel. It is signed and notarized by Apple. Open the `.dmg` and drag HongsaSub into Applications. FFmpeg for video and waveforms is included.
 
 ### Download for Windows
 
-[Download HongsaSub 1.1 for Windows](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe) for Windows 10 and 11, 64-bit, and run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose **More info**, then **Run anyway**. FFmpeg for video and waveforms is included.
+[Download HongsaSub 1.2 for Windows](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe) for Windows 10 and 11, 64-bit, and run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose **More info**, then **Run anyway**. FFmpeg for video and waveforms is included.
 
 ### Download for Linux
 
-[Download HongsaSub 1.1 for Linux](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb) for 64-bit Ubuntu 22.04 and Debian 12 or later, and install it with:
+[Download HongsaSub 1.2 for Linux](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb) for 64-bit Ubuntu 22.04 and Debian 12 or later, and install it with:
 
 ```bash
 sudo apt install ./HongsaSub-linux-amd64.deb
@@ -125,6 +126,7 @@ cargo test --workspace
 | `⌘B` `⌘I` `⌘U` | Bold, italic, underline |
 | `⌘D` | Look up the selected word |
 | `⌘G` | Add the selection to the glossary |
+| `⌘J` | Ask the assistant for a translation |
 | `⌘F` | Search the memory |
 | `⌘⇧H` | Find and replace |
 | `⌘⇧F` | Switch between the Focus and Timing layouts |
@@ -138,16 +140,17 @@ On Windows and Linux, use `Ctrl` for `⌘` and `Alt` for `⌥`.
 hongsasub/
 ├── crates/hongsasub-core   Rust: SRT/ASS parsing and writing, projects, translation memory (SQLite),
 │                           pairing, dictionary, Mon spell-check
-├── src-tauri               Rust: Tauri app, commands, ffmpeg media pipeline, local media server
+├── src-tauri               Rust: Tauri app, commands, ffmpeg media pipeline, local media server,
+│                           translation assistant (Codex, OpenAI, Claude, Gemini and OpenAI-compatible APIs)
 ├── src                     React + TypeScript interface
 └── brand                   Logo artwork
 ```
 
-Your translation memory, glossary, style library and personal word list stay on your computer, in the app's data folder. Nothing is sent anywhere. To keep them safe or move them to another computer, open **Settings → Memory** and choose **Back up…**; **Restore…** adds a backup to the memory without removing anything.
+Your translation memory, glossary, style library and personal word list stay on your computer, in the app's data folder. Nothing is sent anywhere unless you turn on the assistant and ask it for a translation; then only the lines you ask about, the lines around them, matching memory lines and glossary terms go to the service you chose. To keep them safe or move them to another computer, open **Settings → Memory** and choose **Back up…**; **Restore…** adds a backup to the memory without removing anything.
 
 ## Status
 
-HongsaSub **1.1** adds memory backups and bundles FFmpeg. It is used for real film work. Mac, Windows and Linux downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases). Keep backups of your `.hongsa` projects, and back up your memory from Settings → Memory.
+HongsaSub **1.2** adds an optional AI assistant for drafting Mon translations. 1.1 added memory backups and bundled FFmpeg. It is used for real film work. Mac, Windows and Linux downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases). Keep backups of your `.hongsa` projects, and back up your memory from Settings → Memory.
 
 ## Contributing
 

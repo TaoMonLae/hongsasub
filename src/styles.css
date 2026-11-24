@@ -3606,3 +3606,115 @@ select.control {
 .welcome__about {
   margin-top: 14px;
 }
+
+.assist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 100%;
+}
+
+.assist--setup {
+  align-items: flex-start;
+}
+
+.assist__ask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assist__ask .btn kbd {
+  margin-left: 8px;
+}
+
+.assist__busy {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.assist__error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--red);
+}
+
+.assist__insert {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  opacity: 0;
+  transition: opacity 120ms var(--ease);
+}
+
+.match:hover .assist__insert,
+.assist__insert:focus-visible {
+  opacity: 1;
+}
+
+.assist__note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.assist__meta {
+  white-space: normal;
+}
+
+.assist__more {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--hair);
+}
+
+.assist__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 4px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.assist__progress progress {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.assist__key {
+  display: flex;
+  gap: 6px;
+  width: 300px;
+}
+
+.assist__key .btn {
+  flex: none;
+}
+
+.assist__key .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings__control > select.field,
+.settings__control > input.field {
+  width: 260px;
+}
+
+.settings__fineprint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.assist__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hair);
+}

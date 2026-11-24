@@ -108,7 +108,7 @@ fn find_tool(name: &str) -> Option<PathBuf> {
 }
 
 #[cfg(windows)]
-fn quiet_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
+pub(crate) fn quiet_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
     use std::os::windows::process::CommandExt;
     let mut cmd = Command::new(program);
     cmd.creation_flags(0x0800_0000);
@@ -116,7 +116,7 @@ fn quiet_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
 }
 
 #[cfg(not(windows))]
-fn quiet_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
+pub(crate) fn quiet_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
     Command::new(program)
 }
 

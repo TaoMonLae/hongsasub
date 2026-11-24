@@ -1,7 +1,8 @@
 name: Build Linux deb
 on:
+  workflow_dispatch:
   push:
-    branches: [build/linux-v1.1.0]
+    tags: ["v*"]
 permissions:
   contents: read
 jobs:
@@ -21,7 +22,7 @@ jobs:
       - name: Install and launch
         run: |
           pkg=$(find target/release/bundle/deb -name '*.deb' -print -quit)
-          test "$(dpkg-deb -f "$pkg" Version)" = "1.1.0"
+          test "$(dpkg-deb -f "$pkg" Version)" = "$(node -p "require('./package.json').version")"
           test "$(dpkg-deb -f "$pkg" Architecture)" = "amd64"
           sudo apt-get install -y "./$pkg"
           ffprobe -version

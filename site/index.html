@@ -51,7 +51,7 @@
    "applicationCategory": "MultimediaApplication",
    "applicationSubCategory": "Subtitle editor",
    "operatingSystem": "macOS 11 or later, Windows 10, Windows 11, Ubuntu 22.04 or later, Debian 12 or later",
-   "softwareVersion": "1.1.0",
+   "softwareVersion": "1.2.0",
    "datePublished": "2026-11-23",
    "dateModified": "2026-11-24",
    "downloadUrl": [
@@ -59,7 +59,7 @@
     "https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe",
     "https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb"
    ],
-   "releaseNotes": "https://github.com/TaoMonLae/hongsasub/releases/tag/v1.1.0",
+   "releaseNotes": "https://github.com/TaoMonLae/hongsasub/releases/tag/v1.2.0",
    "offers": {
     "@type": "Offer",
     "price": "0",
@@ -95,7 +95,7 @@
 <script>
 try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -150,7 +150,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
             Download for Linux
           </a>
         </div>
-        <p class="get-meta">Version 1.1 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit · Ubuntu 22.04 and Debian 12 or later</p>
+        <p class="get-meta">Version 1.2 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit · Ubuntu 22.04 and Debian 12 or later</p>
         <p class="note">Free and open source, MIT or Apache-2.0. On Ubuntu or Debian, <a href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb">download the .deb</a>. <a href="https://github.com/TaoMonLae/hongsasub">Source on GitHub</a></p>
       </div>
     </div>
@@ -255,6 +255,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
           <li><strong>Fill from memory.</strong> Fill every untranslated line the memory already knows as a draft. You choose exact, 95% or 85%, and one undo removes them all.</li>
           <li><strong>Teach memory from finished work.</strong> Pair an English subtitle with your finished Mon one by timing, review the doubtful pairs, and add them.</li>
           <li><strong>Glossary and dictionary.</strong> Keep agreed names and places, and look up any word in the built-in <a href="https://github.com/Barnista/MonDictDB">MonDict</a> of 26,000 words.</li>
+          <li><strong>AI assistant, if you want one.</strong> Ask ChatGPT, Claude, Gemini or another AI for a Mon draft of the current line, or draft every untranslated line at once. It reads your memory and glossary, and nothing it writes is confirmed until you check it.</li>
           <li><strong>Back up and restore.</strong> Save your memory, glossary, spelling words and styles to one file, and restore it on any computer without losing what is already there.</li>
         </ul>
       </div>
@@ -349,6 +350,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
         <li><kbd data-mac="⌘B ⌘I ⌘U" data-pc="Ctrl+B Ctrl+I Ctrl+U">⌘B ⌘I ⌘U</kbd><span>Bold, italic, underline</span></li>
         <li><kbd data-mac="⌘D" data-pc="Ctrl+D">⌘D</kbd><span>Look up the selected word</span></li>
         <li><kbd data-mac="⌘G" data-pc="Ctrl+G">⌘G</kbd><span>Add the selection to the glossary</span></li>
+        <li><kbd data-mac="⌘J" data-pc="Ctrl+J">⌘J</kbd><span>Ask the AI assistant for a translation</span></li>
         <li><kbd data-mac="⌘F" data-pc="Ctrl+F">⌘F</kbd><span>Search the memory</span></li>
         <li><kbd data-mac="⌘⇧H" data-pc="Ctrl+Shift+H">⌘⇧H</kbd><span>Find and replace</span></li>
         <li><kbd data-mac="⌘⇧F" data-pc="Ctrl+Shift+F">⌘⇧F</kbd><span>Switch between Focus and Timing</span></li>
@@ -361,8 +363,8 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
     <div class="sec__in get">
       <div class="get__text">
         <h2 id="get-title">Get HongsaSub.</h2>
-        <p class="lead">Version 1.1 is out for macOS, Windows and Linux, with FFmpeg for video and waveforms included. The Mac app is signed and notarized by Apple; the Windows app comes with an installer; the Linux app is a <code>.deb</code> package for Ubuntu and Debian.</p>
-        <p class="private">Your translation memory, glossary, style library and word list stay on your computer, in the app's data folder. Nothing is sent anywhere. To keep them safe or move them to a new computer, back them up to one file from Settings → Memory.</p>
+        <p class="lead">Version 1.2 is out for macOS, Windows and Linux, with an optional AI assistant and FFmpeg for video and waveforms included. The Mac app is signed and notarized by Apple; the Windows app comes with an installer; the Linux app is a <code>.deb</code> package for Ubuntu and Debian.</p>
+        <p class="private">Your translation memory, glossary, style library and word list stay on your computer, in the app's data folder. Nothing is sent anywhere unless you turn on the AI assistant and ask it for a translation; then only those lines, the lines around them and matching memory go to the service you chose. To keep them safe or move them to a new computer, back them up to one file from Settings → Memory.</p>
         <h3>To build from source</h3>
         <ul class="needs">
           <li><a href="https://rustup.rs">Rust</a> (stable)</li>
@@ -446,6 +448,6 @@ pnpm tauri dev</code></pre>
   </div>
 </footer>
 
-<script src="app.js?v=3" defer></script>
+<script src="app.js?v=4" defer></script>
 </body>
 </html>

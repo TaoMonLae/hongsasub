@@ -5,6 +5,8 @@ import { listen } from "@tauri-apps/api/event";
 import {
   api,
   errorText,
+  type AssistOut,
+  type AssistRequest,
   type CommitRequest,
   type GlossaryTerm,
   type Misspelling,
@@ -31,6 +33,7 @@ import { ExportModal, ImportModal, OpenModeModal } from "./components/Modals";
 import { SubtitleGrid } from "./components/SubtitleGrid";
 import { Workspace } from "./components/Workspace";
 import { FillModal, ReplaceModal, ShiftModal, ToolsMenu } from "./components/Tools";
+import { AssistDraftModal, AssistPanel, assistName, toSubtitleText, useAssist } from "./components/Assist";
 import { mergeEvents, shiftEvents, splitEvent } from "./lib/edits";
 import { formatLeft, pace } from "./lib/pace";
 import { Timeline } from "./components/Timeline";
@@ -41,7 +44,7 @@ import { SettingsModal, type SettingsPage } from "./components/Settings";
 import { loadSettings, storeSettings, type Settings } from "./lib/settings";
 import { loadBundledFonts } from "./lib/fonts";
 
-type Modal = { kind: "open-mode"; path: string } | { kind: "export" } | { kind: "import" } | { kind: "styles" } | { kind: "fill" } | { kind: "replace" } | { kind: "shift" } | { kind: "settings"; page: SettingsPage } | null;
+type Modal = { kind: "open-mode"; path: string } | { kind: "export" } | { kind: "import" } | { kind: "styles" } | { kind: "fill" } | { kind: "replace" } | { kind: "shift" } | { kind: "assist" } | { kind: "settings"; page: SettingsPage } | null;
 type Toast = { text: string; tone: "ok" | "error" } | null;
 type Snapshot = { events: SubtitleEvent[]; styles: Style[]; focusId: string | null };
 type History = { past: Snapshot[]; future: Snapshot[]; group: string | null; at: number };
@@ -223,6 +226,7 @@ export default function App() {
   const videoName = project?.videoPath ? fileName(project.videoPath) : null;
 
   const notify = useCallback((text: string, tone: "ok" | "error" = "ok") => setToast({ text, tone }), []);
+  const assist = useAssist(notify);
 
   useEffect(() => {
     if (!toast) return;
@@ -591,6 +595,45 @@ export default function App() {
     [notify],
   );
 
+  const buildAssist = useCallback((ids: string[]): AssistRequest => {
+    const p = projectRef.current;
+    const dialogue = (p?.document.events ?? []).filter((e) => e.kind === "dialogue");
+    const index = new Map(dialogue.map((e, i) => [e.id, i]));
+    const positions = ids.map((id) => index.get(id)).filter((i): i is number => i !== undefined).sort((a, b) => a - b);
+    const first = positions[0] ?? 0;
+    const last = positions[positions.length - 1] ?? 0;
+    return {
+      lines: positions.map((i) => ({ id: dialogue[i].id, source: dialogue[i].source, current: dialogue[i].text })),
+      before: dialogue.slice(Math.max(0, first - 4), first).filter((e) => e.source.trim()).map((e) => ({ source: e.source, target: e.text })),
+      after: dialogue.slice(last + 1, last + 3).filter((e) => e.source.trim()).map((e) => ({ source: e.source })),
+      work: p?.work ?? "",
+    };
+  }, []);
+
+  const pickAssist = useCallback((scope: "all" | "after") => {
+    const dialogue = (projectRef.current?.document.events ?? []).filter((e) => e.kind === "dialogue");
+    const from = scope === "after" ? Math.max(0, dialogue.findIndex((e) => e.id === selectedIdRef.current)) : 0;
+    return dialogue.slice(from).filter((e) => e.source.trim() && !plainText(e.text)).map((e) => e.id);
+  }, []);
+
+  const applyAssist = useCallback(
+    (lines: AssistOut[]) => {
+      const fills = new Map(lines.map((l) => [l.id, toSubtitleText(l.mon)]));
+      const open = (projectRef.current?.document.events ?? []).filter((e) => fills.has(e.id) && !plainText(e.text)).length;
+      if (open) setEvents((events) => events.map((e) => (fills.has(e.id) && !plainText(e.text) ? { ...e, text: fills.get(e.id) ?? e.text, status: "draft" } : e)));
+      return open;
+    },
+    [setEvents],
+  );
+
+  const askAssist = useCallback(() => {
+    const id = selectedIdRef.current;
+    const line = projectRef.current?.document.events.find((e) => e.id === id);
+    setSideView("assist");
+    if (!line || !line.source.trim() || assist.status?.config.provider === "off" || !assist.status) return;
+    assist.ask(line.id, buildAssist([line.id]));
+  }, [assist, buildAssist]);
+
   const fillFromMemory = useCallback(
     async (minScore: number) => {
       const p = projectRef.current;
@@ -920,6 +963,9 @@ export default function App() {
         const picked = window.getSelection()?.toString().trim();
         setGlossaryDraft(picked || "");
         setTab("glossary");
+      } else if (mod && lower === "j" && ownField && projectRef.current) {
+        e.preventDefault();
+        askAssist();
       } else if (mod && lower === "d") {
         e.preventDefault();
         const area = editorRef.current;
@@ -950,7 +996,7 @@ export default function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [modal, confirm, applyMatch, move, playLine, saveProject, openFile, togglePlay, selected, stepHistory, lookUp, setFocusLayout]);
+  }, [modal, confirm, applyMatch, move, playLine, saveProject, openFile, togglePlay, selected, stepHistory, lookUp, setFocusLayout, askAssist]);
 
   const setWork = (work: string) => {
     setProject((p) => (p ? { ...p, work } : p));
@@ -1053,6 +1099,11 @@ export default function App() {
             <ToolsMenu
               items={[
                 { label: "Fill from memory…", disabled: !translating, run: () => setModal({ kind: "fill" }) },
+                {
+                  label: "Draft with the assistant…",
+                  disabled: !translating,
+                  run: () => (assist.status?.config.provider === "off" ? setModal({ kind: "settings", page: "assistant" }) : setModal({ kind: "assist" })),
+                },
                 { label: "Find and replace…", hint: `${MOD}${SHIFT}H`, run: () => setModal({ kind: "replace" }) },
                 { label: "Shift timings…", run: () => setModal({ kind: "shift" }) },
               ]}
@@ -1159,6 +1210,25 @@ export default function App() {
                 onLimits={setLimits}
                 onSelect={select}
                 onFix={applyFixes}
+              />
+            }
+            assist={
+              <AssistPanel
+                status={assist.status}
+                line={selected}
+                busy={Boolean(selected && assist.busyId === selected.id)}
+                suggestion={selected ? (assist.results[selected.id] ?? null) : null}
+                error={selected ? (assist.errors[selected.id] ?? null) : null}
+                onAsk={askAssist}
+                onStop={assist.stop}
+                onUse={(text) => {
+                  if (!selected) return;
+                  updateEvent(selected.id, { text: toSubtitleText(text), status: "draft" });
+                  requestAnimationFrame(() => editorRef.current?.focus());
+                }}
+                onInsert={(text) => insertIntoEditor(toSubtitleText(text))}
+                onSetup={() => setModal({ kind: "settings", page: "assistant" })}
+                onDraftMany={() => (assist.status?.config.provider === "off" ? setModal({ kind: "settings", page: "assistant" }) : setModal({ kind: "assist" }))}
               />
             }
           />
@@ -1282,6 +1352,24 @@ export default function App() {
           onClose={() => setModal(null)}
         />
       )}
+      {modal?.kind === "assist" && project && (
+        <AssistDraftModal
+          provider={assist.status?.config.provider ?? "off"}
+          name={assistName(assist.status)}
+          open={pickAssist("all").length}
+          openAfter={pickAssist("after").length}
+          pick={pickAssist}
+          build={buildAssist}
+          apply={applyAssist}
+          onDone={(drafted, error) => {
+            setModal(null);
+            const name = assistName(assist.status);
+            if (error) notify(drafted ? `Drafted ${drafted.toLocaleString()} ${drafted === 1 ? "line" : "lines"}, then ${name} stopped: ${error}` : error, "error");
+            else notify(drafted ? `${name} drafted ${drafted.toLocaleString()} ${drafted === 1 ? "line" : "lines"}. Check them, then confirm.` : `${name} drafted no lines.`);
+          }}
+          onClose={() => setModal(null)}
+        />
+      )}
       {modal?.kind === "replace" && project && <ReplaceModal events={events} onReplace={replaceAll} onSelect={select} onClose={() => setModal(null)} />}
       {modal?.kind === "shift" && project && (
         <ShiftModal selectedIndex={selectedIndex} total={events.length} onShift={shiftTimings} onClose={() => setModal(null)} />
@@ -1313,6 +1401,8 @@ export default function App() {
           limits={limits}
           onLimits={setLimits}
           stats={stats}
+          assistStatus={assist.status}
+          onAssistRefresh={assist.refresh}
           onMemoryChanged={() => {
             refreshStats();
             setMemoryRev((r) => r + 1);

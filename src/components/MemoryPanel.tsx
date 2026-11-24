@@ -5,7 +5,7 @@ import { MOD } from "../lib/keys";
 import { CloseIcon, SearchIcon } from "./Icons";
 
 export type MemoryTab = "matches" | "search" | "glossary" | "dictionary";
-export type SideView = "memory" | "checks";
+export type SideView = "memory" | "assist" | "checks";
 export type DictRequest = { text: string; n: number };
 
 interface Props {
@@ -28,6 +28,7 @@ interface Props {
   issueCount: number;
   errorCount: number;
   checks: ReactNode;
+  assist: ReactNode;
 }
 
 function ago(ms: number): string {
@@ -366,7 +367,7 @@ function DictionaryView({ dictRequest, onInsert }: Pick<Props, "dictRequest" | "
 }
 
 export function MemoryPanel(props: Props) {
-  const { tab, onTab, stats, suggestions, view, onView, issueCount, errorCount, checks } = props;
+  const { tab, onTab, stats, suggestions, view, onView, issueCount, errorCount, checks, assist } = props;
   const tabs: { id: MemoryTab; label: string; count?: number }[] = [
     { id: "matches", label: "Matches", count: suggestions.matches.length },
     { id: "search", label: "Search" },
@@ -374,12 +375,15 @@ export function MemoryPanel(props: Props) {
     { id: "dictionary", label: "Dictionary" },
   ];
   return (
-    <aside className="memory" aria-label={view === "checks" ? "Quality checks" : "Translation memory"}>
+    <aside className="memory" aria-label={view === "checks" ? "Quality checks" : view === "assist" ? "Translation assistant" : "Translation memory"}>
       <header className="memory__head">
         <div className="memory__title">
           <div className="sideswitch" role="tablist" aria-label="Side panel">
             <button role="tab" aria-selected={view === "memory"} className={view === "memory" ? "is-on" : ""} onClick={() => onView("memory")}>
               Memory
+            </button>
+            <button role="tab" aria-selected={view === "assist"} className={view === "assist" ? "is-on" : ""} onClick={() => onView("assist")}>
+              Assist
             </button>
             <button role="tab" aria-selected={view === "checks"} className={view === "checks" ? "is-on" : ""} onClick={() => onView("checks")}>
               Checks
@@ -405,6 +409,7 @@ export function MemoryPanel(props: Props) {
       </header>
       <div className="memory__body" role="tabpanel">
         {view === "checks" && checks}
+        {view === "assist" && assist}
         {view === "memory" && tab === "matches" && <Matches {...props} />}
         {view === "memory" && tab === "search" && <Search onInsert={props.onInsert} onNotify={props.onNotify} />}
         {view === "memory" && tab === "glossary" && <Glossary {...props} />}
