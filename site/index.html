@@ -72,7 +72,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
             Download for Windows
           </a>
         </div>
-        <p class="get-meta">Version 1.0 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit</p>
+        <p class="get-meta">Version 1.1 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit</p>
         <p class="note">Free and open source, MIT or Apache-2.0. On Linux, <a href="#get">build it from source</a>. <a href="https://github.com/TaoMonLae/hongsasub">Source on GitHub</a></p>
       </div>
     </div>
@@ -177,6 +177,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
           <li><strong>Fill from memory.</strong> Fill every untranslated line the memory already knows as a draft. You choose exact, 95% or 85%, and one undo removes them all.</li>
           <li><strong>Teach memory from finished work.</strong> Pair an English subtitle with your finished Mon one by timing, review the doubtful pairs, and add them.</li>
           <li><strong>Glossary and dictionary.</strong> Keep agreed names and places, and look up any word in the built-in <a href="https://github.com/Barnista/MonDictDB">MonDict</a> of 26,000 words.</li>
+          <li><strong>Back up and restore.</strong> Save your memory, glossary, spelling words and styles to one file, and restore it on any computer without losing what is already there.</li>
         </ul>
       </div>
       <figure class="matchcard" aria-label="A memory match as it appears in HongsaSub">
@@ -207,7 +208,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
         <picture class="shot shot--dark"><source media="(max-width: 760px)" srcset="img/app-dark-crop.webp" width="1220" height="960"><img src="img/app-dark-1400.webp" srcset="img/app-dark-1400.webp 1400w, img/app-dark-2400.webp 2400w" sizes="(min-width: 1340px) 1240px, 94vw" width="2400" height="1500" loading="lazy" decoding="async" alt="HongsaSub in the Dark theme: the video with its caption, the English and Mon line editor, a memory match, the waveform timeline and the list of lines."></picture>
       </div>
       <ul class="captions">
-        <li><strong>Video preview.</strong> Styled captions over the film, zoom from 25% to 200%. MKV and HEVC films are converted once with ffmpeg, then cached.</li>
+        <li><strong>Video preview.</strong> Styled captions over the film, zoom from 25% to 200%. MKV and HEVC films are converted once with the built-in FFmpeg, then cached.</li>
         <li><strong>Waveform timeline.</strong> Mon, English and audio on three tracks. Untranslated lines show as hatched outlines, so gaps are easy to find.</li>
         <li><strong>Shift, split, merge.</strong> Move every timing for a different release, split long lines and merge short ones, with undo for each change.</li>
       </ul>
@@ -282,13 +283,14 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
     <div class="sec__in get">
       <div class="get__text">
         <h2 id="get-title">Get HongsaSub.</h2>
-        <p class="lead">Version 1.0 is out for macOS and Windows. The Mac app is signed and notarized by Apple; the Windows app comes with an installer. On Linux, build it from source.</p>
-        <p class="private">Your translation memory, glossary, style library and word list stay on your computer, in the app's data folder. Nothing is sent anywhere.</p>
+        <p class="lead">Version 1.1 is out for macOS and Windows, with FFmpeg built in for video and waveforms. The Mac app is signed and notarized by Apple; the Windows app comes with an installer. On Linux, build it from source.</p>
+        <p class="private">Your translation memory, glossary, style library and word list stay on your computer, in the app's data folder. Nothing is sent anywhere. To keep them safe or move them to a new computer, back them up to one file from Settings → Memory.</p>
         <h3>To build from source</h3>
         <ul class="needs">
           <li><a href="https://rustup.rs">Rust</a> (stable)</li>
           <li><a href="https://nodejs.org">Node.js</a> 20 or later and <a href="https://pnpm.io">pnpm</a></li>
           <li>The <a href="https://tauri.app/start/prerequisites/">Tauri 2 prerequisites</a> for your system</li>
+          <li><a href="https://ffmpeg.org">FFmpeg</a> for video and waveforms</li>
         </ul>
       </div>
       <ol class="steps">
@@ -298,7 +300,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
             <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
             Download for macOS
           </a>
-          <p class="steps__note">Open the <code>.dmg</code> and drag HongsaSub into Applications. For video playback and waveforms, also install <a href="https://ffmpeg.org">ffmpeg</a>, for example with <code>brew install ffmpeg</code>.</p>
+          <p class="steps__note">Open the <code>.dmg</code> and drag HongsaSub into Applications. FFmpeg for video and waveforms is included.</p>
         </li>
         <li>
           <span class="steps__label">Install on Windows</span>
@@ -306,8 +308,8 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
             <svg viewBox="0 0 16 16" aria-hidden="true" class="dl"><path d="M8 2.2v8.2M4.6 7.2 8 10.6l3.4-3.4M2.8 13.4h10.4"/></svg>
             Download for Windows
           </a>
-          <p class="steps__note">Run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose <strong>More info</strong>, then <strong>Run anyway</strong>. For video playback and waveforms, also install <a href="https://ffmpeg.org">ffmpeg</a>, for example with <code>winget install Gyan.FFmpeg</code>.</p>
-          <p class="steps__note">Without ffmpeg you can still translate and export. <a href="https://github.com/TaoMonLae/hongsasub/releases">All releases</a></p>
+          <p class="steps__note">Run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose <strong>More info</strong>, then <strong>Run anyway</strong>. FFmpeg for video and waveforms is included.</p>
+          <p class="steps__note"><a href="https://github.com/TaoMonLae/hongsasub/releases">All releases</a></p>
         </li>
         <li>
           <span class="steps__label">Run it from source</span>
