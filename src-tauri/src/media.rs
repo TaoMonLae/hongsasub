@@ -46,7 +46,7 @@ pub fn stop_all() {
     let pids: Vec<u32> = RUNNING.lock().map(|l| l.clone()).unwrap_or_default();
     for pid in pids {
         let _ = if cfg!(windows) {
-            Command::new("taskkill").args(["/PID", &pid.to_string(), "/F"]).status()
+            quiet_command("taskkill").args(["/PID", &pid.to_string(), "/F"]).status()
         } else {
             Command::new("kill").arg(pid.to_string()).status()
         };
@@ -107,14 +107,31 @@ fn find_tool(name: &str) -> Option<PathBuf> {
     Some(found)
 }
 
+#[cfg(windows)]
+fn quiet_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
+    use std::os::windows::process::CommandExt;
+    let mut cmd = Command::new(program);
+    cmd.creation_flags(0x0800_0000);
+    cmd
+}
+
+#[cfg(not(windows))]
+fn quiet_command(program: impl AsRef<std::ffi::OsStr>) -> Command {
+    Command::new(program)
+}
+
 fn locate_tool(name: &str) -> Option<PathBuf> {
     let exe = if cfg!(windows) { format!("{name}.exe") } else { name.to_string() };
-    let mut candidates: Vec<PathBuf> = vec![PathBuf::from(&exe)];
+    let mut candidates: Vec<PathBuf> = Vec::new();
+    if let Some(dir) = std::env::current_exe().ok().and_then(|p| p.parent().map(Path::to_path_buf)) {
+        candidates.push(dir.join(&exe));
+    }
+    candidates.push(PathBuf::from(&exe));
     for dir in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "C:\\ffmpeg\\bin"] {
         candidates.push(Path::new(dir).join(&exe));
     }
     candidates.into_iter().find(|p| {
-        Command::new(p).arg("-version").stdout(Stdio::null()).stderr(Stdio::null()).status().is_ok()
+        quiet_command(p).arg("-version").stdout(Stdio::null()).stderr(Stdio::null()).status().is_ok()
     })
 }
 
@@ -123,8 +140,8 @@ fn ffmpeg() -> Option<PathBuf> {
 }
 
 fn probe(source: &Path) -> Result<Probe, String> {
-    let bin = find_tool("ffprobe").ok_or("ffprobe was not found. Install ffmpeg to open this video.")?;
-    let out = Command::new(bin)
+    let bin = find_tool("ffprobe").ok_or("ffprobe was not found, so this video can't be opened. Reinstall HongsaSub to restore it.")?;
+    let out = quiet_command(bin)
         .args(["-v", "error", "-show_entries", "format=duration:stream=codec_type,codec_name,codec_tag_string,pix_fmt", "-of", "compact=p=0"])
         .arg(source)
         .output()
@@ -275,6 +292,13 @@ fn transcode_variants(probe: &Probe) -> Vec<Vec<String>> {
             "-b:v", "3M", "-allow_sw", "1",
         ]));
     }
+    if cfg!(windows) {
+        variants.push(to(&["@INPUT@", "-vf", "scale=-2:720,format=nv12", "-c:v", "h264_mf", "-b:v", "3M", "-hw_encoding", "1"]));
+        variants.push(to(&["@INPUT@", "-vf", "scale=-2:720,format=nv12", "-c:v", "h264_mf", "-b:v", "3M"]));
+    }
+    variants.push(to(&[
+        "@INPUT@", "-vf", "scale=-2:540,format=yuv420p", "-c:v", "libopenh264", "-b:v", "2M", "-allow_skip_frames", "0",
+    ]));
     variants.push(to(&[
         "@INPUT@", "-vf", "scale=-2:540,format=yuv420p", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
         "-tune", "fastdecode",
@@ -294,7 +318,7 @@ fn run_ffmpeg(
     duration: f64,
     on_progress: &dyn Fn(f64),
 ) -> Result<(), String> {
-    let mut cmd = Command::new(bin);
+    let mut cmd = quiet_command(bin);
     cmd.args(["-y", "-hide_banner", "-loglevel", "error", "-nostats", "-progress", "pipe:1"]);
     for arg in pre_and_video {
         if arg == "@INPUT@" {
@@ -357,7 +381,7 @@ fn prepare(source: &Path, cache_dir: &Path, force_transcode: bool, on_progress: 
         prune_cache(cache_dir, &out);
         return Ok(VideoSource { path: out.to_string_lossy().to_string(), url: String::new(), proxied: true, mode });
     }
-    let bin = ffmpeg().ok_or("ffmpeg was not found. Install it to open this video format.")?;
+    let bin = ffmpeg().ok_or("ffmpeg was not found, so this video can't be converted. Reinstall HongsaSub to restore it.")?;
     let tmp = out.with_extension(format!("part{}-{}.mp4", std::process::id(), JOB.fetch_add(1, Ordering::Relaxed)));
     on_progress(mode, 0.0);
     let report = |r: f64| on_progress(mode, r);
@@ -389,8 +413,8 @@ fn prepare(source: &Path, cache_dir: &Path, force_transcode: bool, on_progress: 
 }
 
 fn read_peaks(source: &Path) -> Result<Peaks, String> {
-    let bin = ffmpeg().ok_or("ffmpeg was not found. Install it to show the audio waveform.")?;
-    let mut child = Command::new(bin)
+    let bin = ffmpeg().ok_or("ffmpeg was not found, so the waveform can't be shown. Reinstall HongsaSub to restore it.")?;
+    let mut child = quiet_command(bin)
         .args(["-hide_banner", "-loglevel", "error", "-i"])
         .arg(source)
         .args(["-vn", "-sn", "-dn", "-ac", "1", "-ar", &SAMPLE_RATE.to_string(), "-f", "s16le", "-"])

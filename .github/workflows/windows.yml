@@ -1,7 +1,8 @@
 name: Build Windows installer
 on:
+  workflow_dispatch:
   push:
-    branches: [build/windows-v1.0.0]
+    tags: ["v*"]
 permissions:
   contents: read
 jobs:
@@ -9,8 +10,6 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: v1.0.0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -18,7 +17,10 @@ jobs:
         with:
           version: 10
       - run: pnpm install --frozen-lockfile
-      - run: pnpm tauri build --bundles nsis
+      - name: Fetch FFmpeg
+        shell: pwsh
+        run: ./scripts/ffmpeg-windows.ps1
+      - run: pnpm release:windows
       - name: Verify installation and startup
         shell: pwsh
         run: |
@@ -28,6 +30,10 @@ jobs:
           if ($setup.ExitCode -ne 0) { throw "Installer failed: $($setup.ExitCode)" }
           $app = Get-Item "$dest/hongsasub.exe"
           if (!(Test-Path "$dest/mondict.sqlite") -or !(Test-Path "$dest/fonts/*.ttf")) { throw "Missing language resources" }
+          if (!(Test-Path "$dest/ffmpeg-licence/LICENSE.txt")) { throw "Missing FFmpeg licence" }
+          & "$dest/ffmpeg.exe" -hide_banner -version | Select-Object -First 1
+          & "$dest/ffprobe.exe" -hide_banner -version | Select-Object -First 1
+          if ($LASTEXITCODE -ne 0) { throw "Bundled FFmpeg does not run" }
           $process = Start-Process $app.FullName -PassThru
           Start-Sleep -Seconds 10
           if ($process.HasExited) { throw "App exited during startup" }

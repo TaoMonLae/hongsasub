@@ -1140,6 +1140,7 @@ export default function App() {
             onApply={applyMatch}
             onInsert={insertIntoEditor}
             onForget={forget}
+            memoryRev={memoryRev}
             onGlossaryChanged={() => {
               refreshStats();
               setMemoryRev((r) => r + 1);
@@ -1312,6 +1313,11 @@ export default function App() {
           limits={limits}
           onLimits={setLimits}
           stats={stats}
+          onMemoryChanged={() => {
+            refreshStats();
+            setMemoryRev((r) => r + 1);
+            setSpellTick((n) => n + 1);
+          }}
           onClose={() => setModal(null)}
         />
       )}

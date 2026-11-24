@@ -186,6 +186,27 @@ export interface CommitRequest {
   work: string;
 }
 
+export interface MergeCounts {
+  added: number;
+  updated: number;
+  unchanged: number;
+}
+
+export interface BackupSummary {
+  lines: number;
+  terms: number;
+  words: number;
+  styleCatalogs: number;
+}
+
+export interface RestoreSummary {
+  lines: MergeCounts;
+  terms: MergeCounts;
+  words: number;
+  styleCatalogs: number;
+  createdAt: number;
+}
+
 export const api = {
   openSubtitle: (path: string, mode: OpenMode) => invoke<Project>("open_subtitle", { path, mode }),
   openProject: (path: string) => invoke<Project>("open_project", { path }),
@@ -203,6 +224,9 @@ export const api = {
   previewPair: (sourcePath: string, targetPath: string) =>
     invoke<PairingPreview>("tm_preview_pair", { sourcePath, targetPath }),
   commitPairs: (pairs: CommitRequest[]) => invoke<number>("tm_commit_pairs", { pairs }),
+  memoryBackup: (path: string) => invoke<BackupSummary>("memory_backup", { path }),
+  memoryRestore: (path: string) => invoke<RestoreSummary>("memory_restore", { path }),
+  memoryFolder: () => invoke<string>("memory_folder"),
   glossaryList: () => invoke<GlossaryTerm[]>("glossary_list"),
   glossaryAdd: (source: string, target: string, note: string) =>
     invoke<GlossaryTerm | null>("glossary_add", { source, target, note }),

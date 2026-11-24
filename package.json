@@ -1,13 +1,16 @@
 {
   "name": "hongsasub",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT OR Apache-2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "ffmpeg:mac": "sh scripts/ffmpeg-mac.sh",
+    "release:mac": "tauri build --target universal-apple-darwin --config src-tauri/tauri.ffmpeg.conf.json",
+    "release:windows": "tauri build --bundles nsis --config src-tauri/tauri.ffmpeg.conf.json"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

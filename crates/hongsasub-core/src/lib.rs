@@ -16,4 +16,4 @@ pub use document::{Event, EventKind, LineStatus, Section, Style, SubtitleDocumen
 pub use error::{CoreError, Result};
 pub use project::Project;
 pub use spell::{Misspelling, SpellChecker};
-pub use tm::{Concordance, GlossaryTerm, Pretranslation, Suggestion, SuggestRequest, SuggestResponse, TmStats, TranslationMemory};
+pub use tm::{Concordance, GlossaryTerm, MemoryDump, MergeCounts, Pretranslation, Suggestion, SuggestRequest, SuggestResponse, TmStats, TranslationMemory};

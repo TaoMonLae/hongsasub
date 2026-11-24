@@ -151,6 +151,44 @@ pub struct TmStats {
     pub works: i64,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SavedSegment {
+    pub source: String,
+    pub target: String,
+    pub prev_norm: String,
+    pub next_norm: String,
+    pub work: String,
+    pub use_count: i64,
+    pub created_at: i64,
+    pub updated_at: i64,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SavedTerm {
+    pub source: String,
+    pub target: String,
+    pub note: String,
+    pub created_at: i64,
+    pub updated_at: i64,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct MemoryDump {
+    pub segments: Vec<SavedSegment>,
+    pub terms: Vec<SavedTerm>,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MergeCounts {
+    pub added: usize,
+    pub updated: usize,
+    pub unchanged: usize,
+}
+
 struct Candidate {
     id: String,
     source: String,
@@ -498,6 +536,146 @@ impl TranslationMemory {
         Ok(TmStats { segments, terms, works })
     }
 
+    pub fn dump(&self) -> Result<MemoryDump> {
+        let mut stmt = self.conn.prepare(
+            "SELECT source, target, prev_norm, next_norm, work, use_count, created_at, updated_at
+             FROM segments WHERE deleted = 0 ORDER BY created_at, rowid",
+        )?;
+        let segments = stmt
+            .query_map([], |r| {
+                Ok(SavedSegment {
+                    source: r.get(0)?,
+                    target: r.get(1)?,
+                    prev_norm: r.get(2)?,
+                    next_norm: r.get(3)?,
+                    work: r.get(4)?,
+                    use_count: r.get(5)?,
+                    created_at: r.get(6)?,
+                    updated_at: r.get(7)?,
+                })
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+        let mut stmt = self.conn.prepare(
+            "SELECT source, target, note, created_at, updated_at FROM terms WHERE deleted = 0 ORDER BY created_at, rowid",
+        )?;
+        let terms = stmt
+            .query_map([], |r| {
+                Ok(SavedTerm {
+                    source: r.get(0)?,
+                    target: r.get(1)?,
+                    note: r.get(2)?,
+                    created_at: r.get(3)?,
+                    updated_at: r.get(4)?,
+                })
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+        Ok(MemoryDump { segments, terms })
+    }
+
+    pub fn merge(&mut self, dump: &MemoryDump) -> Result<(MergeCounts, MergeCounts)> {
+        let now = now_ms();
+        let stamp = |t: i64| if t > 0 { t } else { now };
+        let tx = self.conn.transaction()?;
+        let mut lines = MergeCounts::default();
+        let mut terms = MergeCounts::default();
+        for seg in &dump.segments {
+            let source_norm = normalize_source(&seg.source);
+            let target = clean_target(&seg.target);
+            let target_norm = normalize_target(&target);
+            if source_norm.is_empty() || target_norm.is_empty() {
+                continue;
+            }
+            let created = stamp(seg.created_at);
+            let updated = stamp(seg.updated_at).max(created);
+            let uses = seg.use_count.max(1);
+            let existing: Option<(String, i64, i64, bool)> = tx
+                .query_row(
+                    "SELECT id, use_count, updated_at, deleted FROM segments WHERE source_norm = ?1 AND target_norm = ?2",
+                    params![source_norm, target_norm],
+                    |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get::<_, i64>(3)? != 0)),
+                )
+                .optional()?;
+            match existing {
+                None => {
+                    tx.execute(
+                        "INSERT INTO segments (id, source, source_norm, target, target_norm, prev_norm, next_norm, work,
+                             use_count, created_at, updated_at)
+                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+                        params![
+                            Uuid::new_v4().to_string(),
+                            seg.source.trim(),
+                            source_norm,
+                            target,
+                            target_norm,
+                            seg.prev_norm,
+                            seg.next_norm,
+                            seg.work.trim(),
+                            uses,
+                            created,
+                            updated
+                        ],
+                    )?;
+                    lines.added += 1;
+                }
+                Some((_, _, local_updated, true)) if local_updated >= updated => lines.unchanged += 1,
+                Some((id, local_uses, local_updated, deleted)) => {
+                    let newer = updated > local_updated;
+                    let uses = if deleted { uses } else { uses.max(local_uses) };
+                    if !newer && !deleted && uses == local_uses {
+                        lines.unchanged += 1;
+                        continue;
+                    }
+                    if newer {
+                        tx.execute(
+                            "UPDATE segments SET source = ?2, target = ?3, prev_norm = ?4, next_norm = ?5, work = ?6,
+                                 use_count = ?7, updated_at = ?8, deleted = 0 WHERE id = ?1",
+                            params![id, seg.source.trim(), target, seg.prev_norm, seg.next_norm, seg.work.trim(), uses, updated],
+                        )?;
+                    } else {
+                        tx.execute("UPDATE segments SET use_count = ?2, deleted = 0 WHERE id = ?1", params![id, uses])?;
+                    }
+                    lines.updated += 1;
+                }
+            }
+        }
+        for term in &dump.terms {
+            let source_norm = normalize_source(&term.source);
+            let target = clean_target(&term.target);
+            if source_norm.is_empty() || target.is_empty() {
+                continue;
+            }
+            let created = stamp(term.created_at);
+            let updated = stamp(term.updated_at).max(created);
+            let existing: Option<(String, i64, bool)> = tx
+                .query_row(
+                    "SELECT id, updated_at, deleted FROM terms WHERE source_norm = ?1 AND target = ?2",
+                    params![source_norm, target],
+                    |r| Ok((r.get(0)?, r.get(1)?, r.get::<_, i64>(2)? != 0)),
+                )
+                .optional()?;
+            match existing {
+                None => {
+                    tx.execute(
+                        "INSERT INTO terms (id, source, source_norm, target, note, created_at, updated_at)
+                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![Uuid::new_v4().to_string(), term.source.trim(), source_norm, target, term.note.trim(), created, updated],
+                    )?;
+                    terms.added += 1;
+                }
+                Some((id, local_updated, _)) if updated > local_updated => {
+                    tx.execute(
+                        "UPDATE terms SET source = ?2, note = ?3, updated_at = ?4, deleted = 0 WHERE id = ?1",
+                        params![id, term.source.trim(), term.note.trim(), updated],
+                    )?;
+                    terms.updated += 1;
+                }
+                Some(_) => terms.unchanged += 1,
+            }
+        }
+        tx.commit()?;
+        Ok((lines, terms))
+    }
+
     pub fn segment_target(&self, id: &str) -> Result<Option<String>> {
         Ok(self
             .conn
@@ -709,5 +887,46 @@ mod tests {
             .collect();
         assert_eq!(tm.commit_many(&items).unwrap(), 50);
         assert_eq!(tm.stats().unwrap().segments, 50);
+    }
+
+    #[test]
+    fn dump_and_merge_round_trip() {
+        let source = TranslationMemory::open_in_memory().unwrap();
+        commit(&source, "Go.", "A", "Are you ready?", "Film A");
+        commit(&source, "Go.", "A", "Are you ready?", "Film A");
+        commit(&source, "Stay here.", "B", "", "Film B");
+        source.add_term("Captain Mon", "TERM1", "hero").unwrap();
+        let dump = source.dump().unwrap();
+        assert_eq!(dump.segments.len(), 2);
+
+        let mut fresh = TranslationMemory::open_in_memory().unwrap();
+        let (lines, terms) = fresh.merge(&dump).unwrap();
+        assert_eq!(lines, MergeCounts { added: 2, updated: 0, unchanged: 0 });
+        assert_eq!(terms, MergeCounts { added: 1, updated: 0, unchanged: 0 });
+        assert_eq!(fresh.stats().unwrap().works, 2);
+        let res = ask(&fresh, "Go.", "Are you ready?");
+        assert_eq!(res.matches[0].target, "A");
+        assert_eq!(res.matches[0].use_count, 2);
+        assert!(res.matches[0].context_match);
+        assert_eq!(ask(&fresh, "Captain Mon is here.", "").terms[0].note, "hero");
+
+        let (again, _) = fresh.merge(&dump).unwrap();
+        assert_eq!(again, MergeCounts { added: 0, updated: 0, unchanged: 2 });
+        assert_eq!(fresh.stats().unwrap().segments, 2);
+    }
+
+    #[test]
+    fn merge_keeps_later_deletions_and_local_lines() {
+        let tm = TranslationMemory::open_in_memory().unwrap();
+        let id = commit(&tm, "Go.", "A", "", "");
+        let dump = tm.dump().unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(5));
+        tm.delete_segment(&id).unwrap();
+        commit(&tm, "New line.", "N", "", "");
+        let mut tm = tm;
+        let (lines, _) = tm.merge(&dump).unwrap();
+        assert_eq!(lines.unchanged, 1);
+        assert!(ask(&tm, "Go.", "").matches.is_empty());
+        assert_eq!(tm.stats().unwrap().segments, 1);
     }
 }

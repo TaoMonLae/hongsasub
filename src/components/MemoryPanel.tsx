@@ -21,6 +21,7 @@ interface Props {
   onInsert: (text: string) => void;
   onForget: (id: string) => void;
   onGlossaryChanged: () => void;
+  memoryRev: number;
   onNotify: (text: string, tone?: "ok" | "error") => void;
   view: SideView;
   onView: (view: SideView) => void;
@@ -169,7 +170,7 @@ function Search({ onInsert, onNotify }: Pick<Props, "onInsert" | "onNotify">) {
   );
 }
 
-function Glossary({ glossaryDraft, onInsert, onGlossaryChanged, onNotify }: Props) {
+function Glossary({ glossaryDraft, onInsert, onGlossaryChanged, onNotify, memoryRev }: Props) {
   const [terms, setTerms] = useState<GlossaryTerm[]>([]);
   const [source, setSource] = useState(glossaryDraft);
   const [target, setTarget] = useState("");
@@ -179,7 +180,7 @@ function Glossary({ glossaryDraft, onInsert, onGlossaryChanged, onNotify }: Prop
   const load = () => api.glossaryList().then(setTerms).catch((e) => onNotify(errorText(e), "error"));
   useEffect(() => {
     load();
-  }, []);
+  }, [memoryRev]);
   useEffect(() => setSource(glossaryDraft), [glossaryDraft]);
 
   const add = async (e: React.FormEvent) => {

@@ -4,7 +4,7 @@ use hongsasub_core::pairing::{pair_documents, preview_documents, PairingPreview}
 use hongsasub_core::project::{read_subtitle, OpenMode};
 use hongsasub_core::tm::CommitRequest;
 use hongsasub_core::{Misspelling, SpellChecker};
-use hongsasub_core::{Concordance, DictEntry, DictInfo, GlossaryTerm, Pretranslation, Project, SuggestRequest, SuggestResponse, TmStats};
+use hongsasub_core::{Concordance, DictEntry, DictInfo, GlossaryTerm, MemoryDump, MergeCounts, Pretranslation, Project, SuggestRequest, SuggestResponse, TmStats};
 use tauri::State;
 
 use crate::{AppState, DictState, SpellState};
@@ -234,4 +234,132 @@ pub async fn style_library_load(app: tauri::AppHandle) -> CmdResult<serde_json::
 #[tauri::command]
 pub async fn style_library_save(app: tauri::AppHandle, library: serde_json::Value) -> CmdResult<()> {
     write_json(&style_library_path(&app)?, &library)
+}
+
+const BACKUP_FORMAT: &str = "hongsasub-memory";
+const BACKUP_VERSION: u32 = 1;
+
+#[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Backup {
+    format: String,
+    version: u32,
+    #[serde(default)]
+    app_version: String,
+    #[serde(default)]
+    created_at: i64,
+    #[serde(default)]
+    memory: MemoryDump,
+    #[serde(default)]
+    words: Vec<String>,
+    #[serde(default)]
+    styles: serde_json::Value,
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BackupSummary {
+    pub lines: usize,
+    pub terms: usize,
+    pub words: usize,
+    pub style_catalogs: usize,
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RestoreSummary {
+    pub lines: MergeCounts,
+    pub terms: MergeCounts,
+    pub words: usize,
+    pub style_catalogs: usize,
+    pub created_at: i64,
+}
+
+fn catalogs(value: &serde_json::Value) -> Option<&serde_json::Map<String, serde_json::Value>> {
+    value.get("catalogs").and_then(|c| c.as_object())
+}
+
+#[tauri::command]
+pub async fn memory_backup(app: tauri::AppHandle, state: State<'_, AppState>, path: String) -> CmdResult<BackupSummary> {
+    let memory = state.tm.lock().map_err(err)?.dump().map_err(err)?;
+    let words = user_words(&app);
+    let styles = style_library_load(app.clone()).await?;
+    let summary = BackupSummary {
+        lines: memory.segments.len(),
+        terms: memory.terms.len(),
+        words: words.len(),
+        style_catalogs: catalogs(&styles).map_or(0, |c| c.len()),
+    };
+    let backup = Backup {
+        format: BACKUP_FORMAT.into(),
+        version: BACKUP_VERSION,
+        app_version: app.package_info().version.to_string(),
+        created_at: hongsasub_core::tm::now_ms(),
+        memory,
+        words,
+        styles,
+    };
+    write_json(&PathBuf::from(path), &backup)?;
+    Ok(summary)
+}
+
+#[tauri::command]
+pub async fn memory_restore(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    spell: State<'_, SpellState>,
+    path: String,
+) -> CmdResult<RestoreSummary> {
+    let bytes = std::fs::read(&path).map_err(err)?;
+    let backup: Backup = serde_json::from_slice(&bytes).map_err(|_| "This file isn't a HongsaSub memory backup.".to_string())?;
+    if backup.format != BACKUP_FORMAT {
+        return Err("This file isn't a HongsaSub memory backup.".into());
+    }
+    if backup.version > BACKUP_VERSION {
+        return Err(format!(
+            "This backup was made by a newer HongsaSub ({}). Update HongsaSub to restore it.",
+            backup.app_version
+        ));
+    }
+    let (lines, terms) = state.tm.lock().map_err(err)?.merge(&backup.memory).map_err(err)?;
+
+    let mut words = user_words(&app);
+    let before = words.len();
+    for word in backup.words.iter().map(|w| w.trim()).filter(|w| !w.is_empty()) {
+        if !words.iter().any(|w| w == word) {
+            words.push(word.to_string());
+        }
+    }
+    let added_words = words.len() - before;
+    if added_words > 0 {
+        write_json(&spell_words_path(&app)?, &words)?;
+    }
+
+    let mut added_catalogs = 0;
+    if let Some(incoming) = catalogs(&backup.styles) {
+        let mut local = style_library_load(app.clone()).await?;
+        if catalogs(&local).is_none_or(|c| c.is_empty()) {
+            added_catalogs = incoming.len();
+            local = backup.styles.clone();
+        } else if let Some(existing) = local.get_mut("catalogs").and_then(|c| c.as_object_mut()) {
+            for (name, styles) in incoming {
+                if !existing.contains_key(name) {
+                    existing.insert(name.clone(), styles.clone());
+                    added_catalogs += 1;
+                }
+            }
+        }
+        if added_catalogs > 0 {
+            write_json(&style_library_path(&app)?, &local)?;
+        }
+    }
+
+    *spell.checker.lock().map_err(err)? = None;
+    Ok(RestoreSummary { lines, terms, words: added_words, style_catalogs: added_catalogs, created_at: backup.created_at })
+}
+
+#[tauri::command]
+pub async fn memory_folder(app: tauri::AppHandle) -> CmdResult<String> {
+    use tauri::Manager;
+    Ok(app.path().app_data_dir().map_err(err)?.to_string_lossy().to_string())
 }

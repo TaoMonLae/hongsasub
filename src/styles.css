@@ -3535,6 +3535,23 @@ select.control {
   margin-top: 12px;
 }
 
+.settings__status {
+  min-height: 20px;
+  margin: 10px 0 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.settings__status.is-error {
+  color: var(--red);
+}
+
+.settings__path {
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
 .settings__hint {
   margin-right: auto;
   align-self: center;

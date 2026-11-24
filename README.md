@@ -55,6 +55,7 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 - A **Styles manager** with a reusable style library.
 - **Find and replace** that never touches tags or line breaks.
 - Undo and redo for every text, timing and style change.
+- **Back up and restore** your memory, glossary, spelling words and styles as one file, from Settings → Memory.
 - **Paper and Dark themes.** Warm cream Paper takes its colours from the logo, and graphite Dark is for night work. The app follows macOS, or you can pick one from the toolbar.
 - Resizable panes, and a **Focus** layout for long translation sessions.
 - Opens `.srt`, `.ass` and `.ssa`. Saves `.hongsa` projects and exports ASS or SRT.
@@ -63,15 +64,11 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 
 ### Download for macOS
 
-[Download HongsaSub 1.0](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) for macOS 11 or later, on Apple Silicon or Intel. It is signed and notarized by Apple. Open the `.dmg` and drag HongsaSub into Applications.
-
-For video playback and waveforms, also install [ffmpeg](https://ffmpeg.org), for example with `brew install ffmpeg`. Without it you can still translate and export.
+[Download HongsaSub 1.1](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) for macOS 11 or later, on Apple Silicon or Intel. It is signed and notarized by Apple. Open the `.dmg` and drag HongsaSub into Applications. FFmpeg for video and waveforms is included.
 
 ### Download for Windows
 
-[Download HongsaSub 1.0 for Windows](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe) for Windows 10 and 11, 64-bit, and run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose **More info**, then **Run anyway**.
-
-For video playback and waveforms, also install [ffmpeg](https://ffmpeg.org), for example with `winget install Gyan.FFmpeg`. Without it you can still translate and export.
+[Download HongsaSub 1.1 for Windows](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe) for Windows 10 and 11, 64-bit, and run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose **More info**, then **Run anyway**. FFmpeg for video and waveforms is included.
 
 On Linux, build it from source as below. Every version is on the [releases page](https://github.com/TaoMonLae/hongsasub/releases).
 
@@ -81,7 +78,7 @@ Requirements:
 
 - [Rust](https://rustup.rs) (stable)
 - [Node.js](https://nodejs.org) 20+ and [pnpm](https://pnpm.io)
-- [ffmpeg](https://ffmpeg.org) (includes ffprobe) for video playback and waveforms. Without it you can still translate and export.
+- [ffmpeg](https://ffmpeg.org) (includes ffprobe) for video playback and waveforms. Without it you can still translate and export. Release builds bundle it: `pnpm ffmpeg:mac` then `pnpm release:mac` on a Mac, or `scripts/ffmpeg-windows.ps1` then `pnpm release:windows` on Windows.
 - The [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/) for your system
 
 #### Run from source
@@ -138,11 +135,11 @@ hongsasub/
 └── brand                   Logo artwork
 ```
 
-Your translation memory, glossary, style library and personal word list stay on your computer, in the app's data folder. Nothing is sent anywhere.
+Your translation memory, glossary, style library and personal word list stay on your computer, in the app's data folder. Nothing is sent anywhere. To keep them safe or move them to another computer, open **Settings → Memory** and choose **Back up…**; **Restore…** adds a backup to the memory without removing anything.
 
 ## Status
 
-HongsaSub **1.0** is the first release, used for real film work. Mac and Windows downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases); Linux builds come from source for now. Keep backups of your `.hongsa` projects.
+HongsaSub **1.1** adds memory backups and bundles FFmpeg. It is used for real film work. Mac and Windows downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases); Linux builds come from source for now. Keep backups of your `.hongsa` projects, and back up your memory from Settings → Memory.
 
 ## Contributing
 
@@ -152,6 +149,7 @@ Bug reports, Mon language corrections and pull requests are welcome. See [CONTRI
 
 - The Mon dictionary comes from [MonDictDB](https://github.com/Barnista/MonDictDB) by Barnista, MIT License.
 - Built with [Tauri](https://tauri.app), [React](https://react.dev) and [SQLite](https://sqlite.org).
+- The Mac and Windows downloads include [FFmpeg](https://ffmpeg.org), LGPL 2.1. Its licence and source details are in the app's `ffmpeg-licence` folder.
 
 ## License
 

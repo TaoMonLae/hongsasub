@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { getVersion } from "@tauri-apps/api/app";
-import { api, type DictInfo, type TmStats } from "../lib/api";
+import { open, save } from "@tauri-apps/plugin-dialog";
+import { api, errorText, type DictInfo, type RestoreSummary, type TmStats } from "../lib/api";
 import type { Limits } from "../lib/checks";
 import { loadBundledFonts } from "../lib/fonts";
 import { ALT, MOD } from "../lib/keys";
+import { fileName } from "../lib/text";
 import { AUTOSAVE_CHOICES, DEFAULT_SETTINGS, type Settings } from "../lib/settings";
 import type { Theme, ThemePref } from "../lib/theme";
 import { HongsaIcon } from "./Brand";
 import { LimitsForm } from "./ChecksPanel";
 import { Shell } from "./Modals";
 
-export type SettingsPage = "general" | "editing" | "checks" | "about";
+export type SettingsPage = "general" | "editing" | "checks" | "memory" | "about";
 
 interface Props {
   page: SettingsPage;
@@ -25,6 +27,7 @@ interface Props {
   limits: Limits;
   onLimits: (limits: Limits) => void;
   stats: TmStats | null;
+  onMemoryChanged: () => void;
   onClose: () => void;
 }
 
@@ -32,6 +35,7 @@ const PAGES: { id: SettingsPage; label: string }[] = [
   { id: "general", label: "General" },
   { id: "editing", label: "Editing" },
   { id: "checks", label: "Checks" },
+  { id: "memory", label: "Memory" },
   { id: "about", label: "About" },
 ];
 
@@ -59,6 +63,111 @@ function Row({ label, note, children }: { label: string; note?: string; children
 
 function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (on: boolean) => void; label: string }) {
   return <input type="checkbox" className="settings__toggle" checked={checked} onChange={(e) => onChange(e.target.checked)} aria-label={label} />;
+}
+
+const BACKUP_FILTER = { name: "HongsaSub memory backup", extensions: ["hongsamemory"] };
+
+function count(n: number, one: string, many = `${one}s`) {
+  return `${n.toLocaleString()} ${n === 1 ? one : many}`;
+}
+
+function restoreText(r: RestoreSummary) {
+  const parts: string[] = [];
+  if (r.lines.added) parts.push(`${count(r.lines.added, "line")} added`);
+  if (r.lines.updated) parts.push(`${count(r.lines.updated, "line")} updated`);
+  if (r.terms.added) parts.push(`${count(r.terms.added, "glossary term")} added`);
+  if (r.terms.updated) parts.push(`${count(r.terms.updated, "glossary term")} updated`);
+  if (r.words) parts.push(`${count(r.words, "spelling word")} added`);
+  if (r.styleCatalogs) parts.push(`${count(r.styleCatalogs, "style catalogue")} added`);
+  const from = r.createdAt ? ` from ${new Date(r.createdAt).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}` : "";
+  if (!parts.length) return `Restored the backup${from}. Everything in it was already in memory.`;
+  return `Restored the backup${from}: ${parts.join(", ")}.`;
+}
+
+function MemoryPage({ stats, onChanged }: { stats: TmStats | null; onChanged: () => void }) {
+  const [folder, setFolder] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<{ text: string; tone: "ok" | "error" } | null>(null);
+  useEffect(() => {
+    let live = true;
+    api
+      .memoryFolder()
+      .then((f) => live && setFolder(f))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const backup = async () => {
+    const date = new Date().toISOString().slice(0, 10);
+    const path = await save({ defaultPath: `HongsaSub memory ${date}.hongsamemory`, filters: [BACKUP_FILTER] });
+    if (!path) return;
+    setBusy(true);
+    setStatus(null);
+    try {
+      const s = await api.memoryBackup(path);
+      setStatus({
+        tone: "ok",
+        text: `Saved ${count(s.lines, "line")}, ${count(s.terms, "glossary term")} and ${count(s.words, "spelling word")} to ${fileName(path)}.`,
+      });
+    } catch (e) {
+      setStatus({ tone: "error", text: `Couldn't save the backup. ${errorText(e)}` });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const restore = async () => {
+    const path = await open({ filters: [BACKUP_FILTER] });
+    if (typeof path !== "string") return;
+    setBusy(true);
+    setStatus(null);
+    try {
+      const r = await api.memoryRestore(path);
+      onChanged();
+      setStatus({ tone: "ok", text: restoreText(r) });
+    } catch (e) {
+      setStatus({ tone: "error", text: `Couldn't restore ${fileName(path)}. ${errorText(e)}` });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <p className="modal__lead">
+        Your memory, glossary, spelling words and style library are kept on this computer. Back them up to keep them safe, or to move them to another computer.
+      </p>
+      <Row label="Back up" note="Saves everything to one file. Keep it in a cloud folder or on a USB drive.">
+        <button className="btn" onClick={backup} disabled={busy}>
+          Back up…
+        </button>
+      </Row>
+      <Row label="Restore from a backup" note="Adds the backup to this memory. Nothing is removed, and where both have the same line, the newer one is kept.">
+        <button className="btn" onClick={restore} disabled={busy}>
+          Restore…
+        </button>
+      </Row>
+      <p className={`settings__status${status?.tone === "error" ? " is-error" : ""}`} role={status?.tone === "error" ? "alert" : "status"}>
+        {busy ? "Working…" : status?.text}
+      </p>
+      <dl className="about__facts">
+        <div>
+          <dt>Memory</dt>
+          <dd>
+            {stats
+              ? `${count(stats.segments, "line")} and ${count(stats.terms, "glossary term")} from ${count(stats.works, "film")}`
+              : "Not loaded"}
+          </dd>
+        </div>
+        <div>
+          <dt>Kept in</dt>
+          <dd className="settings__path">{folder || " "}</dd>
+        </div>
+      </dl>
+    </>
+  );
 }
 
 function About({ stats }: { stats: TmStats | null }) {
@@ -114,7 +223,7 @@ function About({ stats }: { stats: TmStats | null }) {
         </div>
         <div>
           <dt>Video</dt>
-          <dd>Formats the app can't play directly are converted with ffmpeg, which must be installed separately.</dd>
+          <dd>Videos the app can't play directly are converted with FFmpeg, which comes with the Mac and Windows downloads under the LGPL 2.1 licence.</dd>
         </div>
         <div>
           <dt>Licence</dt>
@@ -126,7 +235,7 @@ function About({ stats }: { stats: TmStats | null }) {
 }
 
 export function SettingsModal(props: Props) {
-  const { page, onPage, settings, onSettings, themePref, theme, onTheme, focusLayout, onFocusLayout, limits, onLimits, stats, onClose } = props;
+  const { page, onPage, settings, onSettings, themePref, theme, onTheme, focusLayout, onFocusLayout, limits, onLimits, stats, onMemoryChanged, onClose } = props;
   const set = (patch: Partial<Settings>) => onSettings({ ...settings, ...patch });
   return (
     <Shell title={page === "about" ? "About HongsaSub" : "Settings"} onClose={onClose} cardClass="modal__card--settings">
@@ -192,6 +301,7 @@ export function SettingsModal(props: Props) {
             <LimitsForm limits={limits} onLimits={onLimits} />
           </>
         )}
+        {page === "memory" && <MemoryPage stats={stats} onChanged={onMemoryChanged} />}
         {page === "about" && <About stats={stats} />}
       </div>
       <div className="modal__actions">

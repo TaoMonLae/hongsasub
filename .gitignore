@@ -9,3 +9,4 @@ src-tauri/gen
 *.tsbuildinfo
 /*.srt
 /*.ass
+src-tauri/binaries
