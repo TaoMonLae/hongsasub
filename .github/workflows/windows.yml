@@ -31,9 +31,11 @@ jobs:
           $app = Get-Item "$dest/hongsasub.exe"
           if (!(Test-Path "$dest/mondict.sqlite") -or !(Test-Path "$dest/fonts/*.ttf")) { throw "Missing language resources" }
           if (!(Test-Path "$dest/ffmpeg-licence/LICENSE.txt")) { throw "Missing FFmpeg licence" }
-          & "$dest/ffmpeg.exe" -hide_banner -version | Select-Object -First 1
-          & "$dest/ffprobe.exe" -hide_banner -version | Select-Object -First 1
-          if ($LASTEXITCODE -ne 0) { throw "Bundled FFmpeg does not run" }
+          foreach ($tool in "ffmpeg", "ffprobe") {
+            $lines = & "$dest/$tool.exe" -hide_banner -version
+            if ($LASTEXITCODE -ne 0) { throw "Bundled $tool does not run" }
+            Write-Output $lines[0]
+          }
           $process = Start-Process $app.FullName -PassThru
           Start-Sleep -Seconds 10
           if ($process.HasExited) { throw "App exited during startup" }
