@@ -248,8 +248,8 @@ function Glossary({ glossaryDraft, onInsert, onGlossaryChanged, onNotify, memory
   );
 }
 
-const LANG_LABEL: Record<string, string> = { eng: "EN", mya: "MY", tha: "TH" };
-const LANG_ATTR: Record<string, string> = { eng: "en", mya: "my", tha: "th" };
+const LANG_LABEL: Record<string, string> = { eng: "EN", mya: "MY", tha: "TH", mnw: "MN" };
+const LANG_ATTR: Record<string, string> = { eng: "en", mya: "my", tha: "th", mnw: "mnw" };
 const POS_LABEL: Record<string, string> = {
   n: "noun",
   v: "verb",
@@ -262,10 +262,81 @@ const POS_LABEL: Record<string, string> = {
   pali: "Pali",
   sansakrit: "Sanskrit",
   uncl: "",
+  int: "interjection",
+  num: "number",
+  part: "particle",
+  art: "article",
+  prefix: "prefix",
+  suffix: "suffix",
+  aux: "auxiliary",
+  abbr: "abbreviation",
 };
-const FOLDED_PER_LANG: Record<string, number> = { eng: 4, mya: 2, tha: 1 };
+const FOLDED_PER_LANG: Record<string, number> = { eng: 4, mya: 2, tha: 1, mnw: 3 };
+const MON_NUMBER = /^[\u1040-\u1049\d]+$/;
+
+function posLabel(pos: string) {
+  return pos
+    .split("/")
+    .filter(Boolean)
+    .map((p) => POS_LABEL[p] ?? p)
+    .filter(Boolean)
+    .join(", ");
+}
+
+function glossGroups(text: string) {
+  const groups: string[][] = [[]];
+  for (const raw of text.split(/[\u104A\u104B]/)) {
+    const item = raw.trim();
+    if (!item) continue;
+    if (MON_NUMBER.test(item)) {
+      if (groups[groups.length - 1].length) groups.push([]);
+      continue;
+    }
+    groups[groups.length - 1].push(item);
+  }
+  return groups.filter((g) => g.length);
+}
+
+function EnglishEntry({ entry, onInsert }: { entry: DictEntry; onInsert: (text: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const shown = open ? entry.senses : entry.senses.slice(0, FOLDED_PER_LANG.mnw);
+  const hidden = entry.senses.length - shown.length;
+  return (
+    <li className="dict__entry dict__entry--english">
+      <div className="dict__head dict__head--static">
+        <b lang="en">{entry.word}</b>
+      </div>
+      <ol className="dict__senses">
+        {shown.map((s, i) => (
+          <li key={i} className="dict__sense dict__sense--mnw">
+            <span className="dict__lang">{LANG_LABEL.mnw}</span>
+            <span className="dict__text">
+              {posLabel(s.pos) && <em className="dict__pos">{posLabel(s.pos)}</em>}
+              {s.example && <span className="dict__note">{s.example}</span>}
+              {glossGroups(s.text).map((group, g) => (
+                <span key={g} className="dict__glosses">
+                  {group.map((item, k) => (
+                    <button key={k} className="dict__gloss mon" lang="mnw" onClick={() => onInsert(item)} title="Insert at cursor">
+                      {item}
+                    </button>
+                  ))}
+                </span>
+              ))}
+            </span>
+          </li>
+        ))}
+      </ol>
+      {hidden > 0 && (
+        <button className="btn btn--plain btn--small dict__more" onClick={() => setOpen(true)}>
+          {hidden} more {hidden === 1 ? "meaning" : "meanings"}
+        </button>
+      )}
+    </li>
+  );
+}
 
 function DictionaryEntry({ entry, onInsert }: { entry: DictEntry; onInsert: (text: string) => void }) {
+  if (entry.kind === "english") return <EnglishEntry entry={entry} onInsert={onInsert} />;
   const [open, setOpen] = useState(false);
   const shown = open
     ? entry.senses
@@ -284,7 +355,7 @@ function DictionaryEntry({ entry, onInsert }: { entry: DictEntry; onInsert: (tex
           <li key={i} className={`dict__sense dict__sense--${s.lang}`}>
             <span className="dict__lang">{LANG_LABEL[s.lang] ?? s.lang}</span>
             <span className="dict__text" lang={LANG_ATTR[s.lang]}>
-              {POS_LABEL[s.pos] !== "" && <em className="dict__pos">{POS_LABEL[s.pos] ?? s.pos}</em>}
+              {posLabel(s.pos) && <em className="dict__pos">{posLabel(s.pos)}</em>}
               {s.text}
               {s.example && <span className="dict__example">{s.example}</span>}
             </span>
@@ -358,10 +429,13 @@ function DictionaryView({ dictRequest, onInsert }: Pick<Props, "dictRequest" | "
       {!error && query.trim() && !searching && results.length === 0 && <p className="empty">No entries for “{query.trim()}”.</p>}
       <ul className="dict__list">
         {results.map((entry) => (
-          <DictionaryEntry key={entry.id} entry={entry} onInsert={onInsert} />
+          <DictionaryEntry key={`${entry.kind}-${entry.id}`} entry={entry} onInsert={onInsert} />
         ))}
       </ul>
-      <p className="dict__credit">Dictionary data: MonDictDB, MIT licence</p>
+      <p className="dict__credit">
+        Dictionary data: MonDictDB (MIT licence) and the Mon–English dictionary by Nai Aung Nyan Lynn, Nai Tun Wai and others from Nai Saik
+        Chan’s mon2engdict app, used with permission.
+      </p>
     </div>
   );
 }

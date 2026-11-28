@@ -51,7 +51,7 @@
    "applicationCategory": "MultimediaApplication",
    "applicationSubCategory": "Subtitle editor",
    "operatingSystem": "macOS 11 or later, Windows 10, Windows 11, Ubuntu 22.04 or later, Debian 12 or later",
-   "softwareVersion": "1.2.0",
+   "softwareVersion": "1.3.0",
    "datePublished": "2026-11-23",
    "dateModified": "2026-11-24",
    "downloadUrl": [
@@ -59,7 +59,7 @@
     "https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe",
     "https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb"
    ],
-   "releaseNotes": "https://github.com/TaoMonLae/hongsasub/releases/tag/v1.2.0",
+   "releaseNotes": "https://github.com/TaoMonLae/hongsasub/releases/tag/v1.3.0",
    "offers": {
     "@type": "Offer",
     "price": "0",
@@ -150,7 +150,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
             Download for Linux
           </a>
         </div>
-        <p class="get-meta">Version 1.2 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit · Ubuntu 22.04 and Debian 12 or later</p>
+        <p class="get-meta">Version 1.3 · macOS 11 or later on Apple Silicon and Intel · Windows 10 and 11, 64-bit · Ubuntu 22.04 and Debian 12 or later</p>
         <p class="note">Free and open source, MIT or Apache-2.0. On Ubuntu or Debian, <a href="https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb">download the .deb</a>. <a href="https://github.com/TaoMonLae/hongsasub">Source on GitHub</a></p>
       </div>
     </div>
@@ -254,7 +254,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
           <li><strong>Same scene, this film.</strong> Context tags tell you when a match comes from the lines around it or from the same film.</li>
           <li><strong>Fill from memory.</strong> Fill every untranslated line the memory already knows as a draft. You choose exact, 95% or 85%, and one undo removes them all.</li>
           <li><strong>Teach memory from finished work.</strong> Pair an English subtitle with your finished Mon one by timing, review the doubtful pairs, and add them.</li>
-          <li><strong>Glossary and dictionary.</strong> Keep agreed names and places, and look up any word in the built-in <a href="https://github.com/Barnista/MonDictDB">MonDict</a> of 26,000 words.</li>
+          <li><strong>Glossary and dictionary.</strong> Keep agreed names and places, and look up any word in the built-in dictionary of 52,000 Mon words and 11,500 English words and phrases.</li>
           <li><strong>AI assistant, if you want one.</strong> Ask ChatGPT, Claude, Gemini or another AI for a Mon draft of the current line, or draft every untranslated line at once. It reads your memory and glossary, and nothing it writes is confirmed until you check it.</li>
           <li><strong>Back up and restore.</strong> Save your memory, glossary, spelling words and styles to one file, and restore it on any computer without losing what is already there.</li>
         </ul>
@@ -363,7 +363,7 @@ try { var t = localStorage.getItem("hongsasub-theme"); if (t === "paper" || t ==
     <div class="sec__in get">
       <div class="get__text">
         <h2 id="get-title">Get HongsaSub.</h2>
-        <p class="lead">Version 1.2 is out for macOS, Windows and Linux, with an optional AI assistant and FFmpeg for video and waveforms included. The Mac app is signed and notarized by Apple; the Windows app comes with an installer; the Linux app is a <code>.deb</code> package for Ubuntu and Debian.</p>
+        <p class="lead">Version 1.3 is out for macOS, Windows and Linux, with a larger Mon–English dictionary, an optional AI assistant and FFmpeg for video and waveforms included. The Mac app is signed and notarized by Apple; the Windows app comes with an installer; the Linux app is a <code>.deb</code> package for Ubuntu and Debian.</p>
         <p class="private">Your translation memory, glossary, style library and word list stay on your computer, in the app's data folder. Nothing is sent anywhere unless you turn on the AI assistant and ask it for a translation; then only those lines, the lines around them and matching memory go to the service you chose. To keep them safe or move them to a new computer, back them up to one file from Settings → Memory.</p>
         <h3>To build from source</h3>
         <ul class="needs">
@@ -444,7 +444,7 @@ pnpm tauri dev</code></pre>
       <li><a href="https://github.com/TaoMonLae/hongsasub/blob/main/SECURITY.md">Security</a></li>
       <li><a href="https://github.com/TaoMonLae/hongsasub#license">MIT or Apache-2.0</a></li>
     </ul>
-    <p class="foot__credit">The Mon dictionary comes from <a href="https://github.com/Barnista/MonDictDB">MonDictDB</a> by Barnista (MIT). Built with Tauri, React and SQLite.</p>
+    <p class="foot__credit">The Mon dictionary comes from <a href="https://github.com/Barnista/MonDictDB">MonDictDB</a> by Barnista (MIT) and the mon2engdict Mon–English dictionary by Nai Aung Nyan Lynn, Nai Tun Wai and others (app by Nai Saik Chan), used with permission. Built with Tauri, React and SQLite.</p>
   </div>
 </footer>
 

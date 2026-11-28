@@ -1,0 +1,14 @@
+Mon–English and English–Mon dictionary entries
+
+The Mon–English and English–Mon entries in mondict.sqlite come from the
+mon2engdict app by Nai Saik Chan.
+
+Dictionary data: Nai Aung Nyan Lynn, Nai Tun Wai and other dictionary sources.
+
+These entries are included in HongsaSub with permission. They are not covered
+by HongsaSub's MIT or Apache-2.0 licence, and all rights remain with their
+authors. Do not copy or redistribute them outside HongsaSub without the
+authors' permission.
+
+The rest of mondict.sqlite comes from MonDictDB by Barnista (MIT License);
+see MonDictDB-LICENSE.

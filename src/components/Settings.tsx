@@ -217,7 +217,14 @@ function About({ stats }: { stats: TmStats | null }) {
           <dt>Dictionary</dt>
           <dd>
             {dict
-              ? `${dict.words.toLocaleString()} words · ${dict.source || "MonDictDB"}${dict.revision ? ` (${dict.revision})` : ""} · ${dict.license || "MIT"} licence`
+              ? [
+                  `${dict.words.toLocaleString()} Mon words`,
+                  dict.englishWords ? `${dict.englishWords.toLocaleString()} English words and phrases` : "",
+                  `${dict.source || "MonDictDB"}${dict.revision ? ` (${dict.revision})` : ""} · ${dict.license || "MIT"} licence`,
+                  dict.extraSource ? `${dict.extraSource} · ${dict.extraLicense}` : "",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
               : "Not available"}
           </dd>
         </div>

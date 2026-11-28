@@ -11,7 +11,7 @@ pub mod tags;
 pub mod time;
 pub mod tm;
 
-pub use dictionary::{DictEntry, DictInfo, DictSense, Dictionary};
+pub use dictionary::{english_forms, english_key, gloss_items, DictEntry, DictInfo, DictKind, DictSense, Dictionary};
 pub use document::{Event, EventKind, LineStatus, Section, Style, SubtitleDocument, SubtitleFormat};
 pub use error::{CoreError, Result};
 pub use project::Project;

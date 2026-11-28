@@ -1,5 +1,6 @@
 import argparse
 import glob
+import importlib.util
 import os
 import re
 import sqlite3
@@ -105,13 +106,24 @@ def build(source_dir, out_path, revision):
     print(f"{len(words)} words, {len(senses)} senses -> {out_path}")
 
 
+def merge_engmon(out_path, engmon_path):
+    here = os.path.dirname(os.path.abspath(__file__))
+    spec = importlib.util.spec_from_file_location("merge_engmondict", os.path.join(here, "merge_engmondict.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.merge(out_path, os.path.abspath(engmon_path))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build the HongsaSub dictionary from a MonDictDB checkout.")
     parser.add_argument("source", help="path to a MonDictDB checkout")
     parser.add_argument("out", nargs="?", default=os.path.join(os.path.dirname(__file__), "..", "src-tauri", "resources", "mondict.sqlite"))
     parser.add_argument("--revision", default="unknown")
+    parser.add_argument("--engmon", help="path to the mon2engdict engmondict.db to merge in")
     args = parser.parse_args()
     build(args.source, os.path.abspath(args.out), args.revision)
+    if args.engmon:
+        merge_engmon(os.path.abspath(args.out), args.engmon)
 
 
 if __name__ == "__main__":

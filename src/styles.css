@@ -1407,6 +1407,10 @@ select.control {
   background: var(--row-hover);
 }
 
+.dict__head--static:hover {
+  background: none;
+}
+
 .dict__head b {
   font-size: 18px;
   font-weight: 500;
@@ -1461,6 +1465,32 @@ select.control {
 .dict__example {
   display: block;
   color: var(--text-3);
+}
+
+.dict__note {
+  color: var(--text-3);
+  margin-right: 6px;
+}
+
+.dict__glosses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+.dict__gloss {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  padding: 1px 8px;
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  text-align: left;
+}
+
+.dict__gloss:hover {
+  background: var(--row-hover);
 }
 
 .dict__more {

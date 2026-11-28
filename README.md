@@ -38,7 +38,7 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 - **Translation memory.** Every confirmed line is stored with its neighbours and film. Matches come back with a score, a word-by-word diff, and "same scene" or "this film" hints. Press `⌘1`–`⌘9` to use one.
 - **Fill from memory.** Fill every untranslated line that memory already knows as a draft. You choose how close a match must be (exact, 95%+ or 85%+), and one undo removes them all.
 - **Teach memory from finished work.** Pair an English subtitle with your finished Mon one by timing, review doubtful pairs (merged lines, numbers that differ, lines left untranslated) and add them to memory.
-- **Glossary and dictionary.** Keep agreed terms for names and places. Look up any Mon or English word in the built-in [MonDict](https://github.com/Barnista/MonDictDB) dictionary of 26,000 words (`⌘D`).
+- **Glossary and dictionary.** Keep agreed terms for names and places. Look up any Mon or English word in the built-in dictionary (`⌘D`): 52,000 Mon words from [MonDictDB](https://github.com/Barnista/MonDictDB) and the mon2engdict Mon–English dictionary, plus 11,500 English words and phrases with their Mon equivalents. Click a Mon equivalent to insert it at the cursor.
 - **AI assistant (optional).** Ask ChatGPT, Claude or Gemini for a Mon translation of the current line (`⌘J`), or draft every untranslated line at once. It reads your memory, glossary and the lines around each line, and everything it writes arrives as a draft for you to check. Use a ChatGPT plan through OpenAI's [Codex](https://developers.openai.com/codex) app (choose any model your plan offers, and how hard it thinks), a free Gemini key from [Google AI Studio](https://aistudio.google.com/apikey) (no card needed), an OpenAI, Claude or paid Gemini API key, or any other service with an OpenAI-compatible API (OpenRouter, DeepSeek, Mistral, Groq, xAI, Together AI, or models on your own computer through Ollama or LM Studio); set it up in **Settings → Assistant**. On a free Gemini key, Google may use what you send to improve its products. Keys are kept in your system's keychain. Claude Pro and Max plans and Google AI Pro and Ultra plans can't be used, because Anthropic and Google don't allow other apps to use them.
 
 ### Check before you ship
@@ -65,15 +65,15 @@ Subtitle editors like Aegisub know about video, waveforms and timing, but forget
 
 ### Download for macOS
 
-[Download HongsaSub 1.2](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) for macOS 11 or later, on Apple Silicon or Intel. It is signed and notarized by Apple. Open the `.dmg` and drag HongsaSub into Applications. FFmpeg for video and waveforms is included.
+[Download HongsaSub 1.3](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-mac.dmg) for macOS 11 or later, on Apple Silicon or Intel. It is signed and notarized by Apple. Open the `.dmg` and drag HongsaSub into Applications. FFmpeg for video and waveforms is included.
 
 ### Download for Windows
 
-[Download HongsaSub 1.2 for Windows](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe) for Windows 10 and 11, 64-bit, and run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose **More info**, then **Run anyway**. FFmpeg for video and waveforms is included.
+[Download HongsaSub 1.3 for Windows](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-windows-x64-setup.exe) for Windows 10 and 11, 64-bit, and run the installer. It isn't code-signed yet, so Windows may say it protected your PC: choose **More info**, then **Run anyway**. FFmpeg for video and waveforms is included.
 
 ### Download for Linux
 
-[Download HongsaSub 1.2 for Linux](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb) for 64-bit Ubuntu 22.04 and Debian 12 or later, and install it with:
+[Download HongsaSub 1.3 for Linux](https://github.com/TaoMonLae/hongsasub/releases/latest/download/HongsaSub-linux-amd64.deb) for 64-bit Ubuntu 22.04 and Debian 12 or later, and install it with:
 
 ```bash
 sudo apt install ./HongsaSub-linux-amd64.deb
@@ -150,7 +150,7 @@ Your translation memory, glossary, style library and personal word list stay on 
 
 ## Status
 
-HongsaSub **1.2** adds an optional AI assistant for drafting Mon translations. 1.1 added memory backups and bundled FFmpeg. It is used for real film work. Mac, Windows and Linux downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases). Keep backups of your `.hongsa` projects, and back up your memory from Settings → Memory.
+HongsaSub **1.3** doubles the built-in Mon dictionary and adds English–Mon lookups. 1.2 added an optional AI assistant for drafting Mon translations, and 1.1 added memory backups and bundled FFmpeg. It is used for real film work. Mac, Windows and Linux downloads are on the [releases page](https://github.com/TaoMonLae/hongsasub/releases). Keep backups of your `.hongsa` projects, and back up your memory from Settings → Memory.
 
 ## Contributing
 
@@ -159,6 +159,7 @@ Bug reports, Mon language corrections and pull requests are welcome. See [CONTRI
 ## Credits
 
 - The Mon dictionary comes from [MonDictDB](https://github.com/Barnista/MonDictDB) by Barnista, MIT License.
+- The Mon–English and English–Mon entries come from the mon2engdict app by Nai Saik Chan, with dictionary data by Nai Aung Nyan Lynn, Nai Tun Wai and others. They are included with permission and are not covered by HongsaSub's licence; see `src-tauri/resources/Mon2EngDict-NOTICE`. To rebuild the database, run `python3 scripts/merge_engmondict.py path/to/engmondict.db`.
 - Built with [Tauri](https://tauri.app), [React](https://react.dev) and [SQLite](https://sqlite.org).
 - The Mac and Windows downloads include [FFmpeg](https://ffmpeg.org), LGPL 2.1. Its licence and source details are in the app's `ffmpeg-licence` folder.
 

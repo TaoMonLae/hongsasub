@@ -119,7 +119,7 @@ export interface Peaks {
 }
 
 export interface DictSense {
-  lang: "eng" | "mya" | "tha" | string;
+  lang: "eng" | "mya" | "tha" | "mnw" | string;
   pos: string;
   text: string;
   example: string;
@@ -127,6 +127,7 @@ export interface DictSense {
 
 export interface DictEntry {
   id: number;
+  kind: "mon" | "english";
   word: string;
   ipa: string;
   senses: DictSense[];
@@ -137,6 +138,9 @@ export interface DictInfo {
   source: string;
   revision: string;
   license: string;
+  englishWords: number;
+  extraSource: string;
+  extraLicense: string;
 }
 
 export interface SuggestRequest {
